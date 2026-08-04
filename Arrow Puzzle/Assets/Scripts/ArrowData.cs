@@ -1,6 +1,7 @@
 using UnityEngine;
 
-public class ArrowData : MonoBehaviour
+[System.Serializable]
+public class ArrowData
 {
     public Vector2Int gridPosition;
 
