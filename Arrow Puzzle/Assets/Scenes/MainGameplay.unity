@@ -445,6 +445,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1259442364}
+  - component: {fileID: 1259442365}
   m_Layer: 0
   m_Name: GridManager
   m_TagString: Untagged
@@ -467,6 +468,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1259442365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1259442363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46669da65e71d964eb95227c307e7538, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridManager
+  cell: {fileID: 3849721112141683990, guid: 189c25fa265ea2841b3eb1f96b546adf, type: 3}
+  arrow: {fileID: 824910203827542374, guid: e78add65c08eba841b8cc240a3bc715d, type: 3}
+  currentLevel: {fileID: 11400000, guid: 9c7160030d529404d858dde8012eb764, type: 2}
+  cellSize: 1
 --- !u!1 &2020223541
 GameObject:
   m_ObjectHideFlags: 0
