@@ -19,9 +19,11 @@ public class InputManager : MonoBehaviour
 
             RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
 
-            if(hit.collider != null)
+            ArrowController arrow = hit.collider?.GetComponent<ArrowController>();
+
+            if (arrow != null)
             {
-                Debug.Log($"Hit object: {hit.collider.gameObject.name}");
+                arrow.SelectArrow();
             }
         }
     }

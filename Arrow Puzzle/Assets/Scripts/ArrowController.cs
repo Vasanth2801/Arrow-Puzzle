@@ -6,5 +6,18 @@ public class ArrowController : MonoBehaviour
 
     public ArrowDirection direction;
 
-   
+    private GridManager gridManager;
+
+    private void Start()
+    {
+        gridManager = FindAnyObjectByType<GridManager>();
+    }
+
+    public void SelectArrow()
+    {
+        if(gridManager.CanMove(this))
+        {
+            Debug.Log("Arrow selected and can move.");
+        }
+    }
 }

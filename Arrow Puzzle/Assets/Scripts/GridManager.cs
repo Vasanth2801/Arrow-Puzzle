@@ -70,4 +70,9 @@ public class GridManager : MonoBehaviour
             }
         }
     }
+
+    public bool CanMove(ArrowController arrow)
+    {
+        return true;
+    }
 }
