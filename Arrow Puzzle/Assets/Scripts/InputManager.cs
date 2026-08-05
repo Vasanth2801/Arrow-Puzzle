@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] private Camera mainCam;
 
     private void Update()

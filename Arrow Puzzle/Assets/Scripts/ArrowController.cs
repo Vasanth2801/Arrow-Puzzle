@@ -2,15 +2,49 @@ using UnityEngine;
 
 public class ArrowController : MonoBehaviour
 {
+    [Header("Arrow position and direction")]
     public Vector2Int gridPosition;
-
     public ArrowDirection direction;
 
+    [Header("References")]
     private GridManager gridManager;
+
+    [Header("Arrow movement settings")]
+    [SerializeField] private float moveSpeed = 5f;
+    private bool isMoving = false;
+    private Vector3 targetPosition;
 
     private void Start()
     {
         gridManager = FindAnyObjectByType<GridManager>();
+    }
+
+    public void Move(Vector3 target)
+    {
+        targetPosition = target;
+        isMoving = true;
+
+        if (transform.position == target)
+        {
+            isMoving = false;
+            gameObject.SetActive(false);
+        }
+    }
+
+    private void Update()
+    {
+        if (!isMoving)
+        {
+            return;
+        }
+
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+
+        if (Vector3.Distance(transform.position, targetPosition) < 0.01f)
+        {
+            transform.position = targetPosition;
+            isMoving = false;
+        }
     }
 
     public void SelectArrow()
@@ -18,6 +52,7 @@ public class ArrowController : MonoBehaviour
         if(gridManager.CanMove(this))
         {
             Debug.Log("Arrow selected and can move.");
+            Move(transform.position + Vector3.right * 5f); // Example movement to the right
         }
     }
 }
