@@ -11,7 +11,7 @@ public class ArrowController : MonoBehaviour
 
     [Header("Arrow movement settings")]
     [SerializeField] private float moveSpeed = 5f;
-    private bool isMoving = false;
+    [SerializeField] private bool isMoving = false;
     private Vector3 targetPosition;
 
     private void Start()
@@ -23,12 +23,6 @@ public class ArrowController : MonoBehaviour
     {
         targetPosition = target;
         isMoving = true;
-
-        if (transform.position == target)
-        {
-            isMoving = false;
-            gameObject.SetActive(false);
-        }
     }
 
     private void Update()
