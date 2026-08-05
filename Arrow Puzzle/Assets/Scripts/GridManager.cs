@@ -37,7 +37,6 @@ public class GridManager : MonoBehaviour
                 grid[i, j] = newCell;
             }
         }
-
         Debug.Log($"Grid generated with {currentLevel.rows} rows and {currentLevel.columns} columns.");
     }
 
