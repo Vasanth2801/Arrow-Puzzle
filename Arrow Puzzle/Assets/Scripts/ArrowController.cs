@@ -21,6 +21,11 @@ public class ArrowController : MonoBehaviour
 
     public void Move(Vector3 target)
     {
+        if(isMoving)
+        {
+            return;
+        }
+
         targetPosition = target;
         isMoving = true;
     }
@@ -45,8 +50,18 @@ public class ArrowController : MonoBehaviour
     {
         if(gridManager.CanMove(this))
         {
-            Debug.Log("Arrow selected and can move.");
-            Move(transform.position + Vector3.right * 5f); // Example movement to the right
+            Vector2Int nextPosition = gridManager.GetNextPosition(gridPosition, direction);
+
+            if(gridManager.IsInsideGrid(nextPosition))
+            {
+                Move(gridManager.GetWorldPosition(nextPosition));
+                gridPosition = nextPosition;
+            }
+            else
+            {
+                Debug.Log("Arrow Left Grid");
+                Destroy(gameObject);
+            }
         }
     }
 }

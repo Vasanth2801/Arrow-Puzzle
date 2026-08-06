@@ -46,7 +46,6 @@ public class GridManager : MonoBehaviour
     {
         foreach(ArrowData arrowData in currentLevel.arrows)
         {
-
             Debug.Log($"Placing arrow at grid position {arrowData.gridPosition} with direction {arrowData.direction}.");
             Cell targetCell = grid[arrowData.gridPosition.x, arrowData.gridPosition.y];
 
@@ -60,7 +59,7 @@ public class GridManager : MonoBehaviour
                 case ArrowDirection.Up:
                     newArrow.transform.rotation = Quaternion.Euler(0, 0, 0);
                     break;
-                case ArrowDirection.Right:
+                case ArrowDirection.Right:    
                     newArrow.transform.rotation = Quaternion.Euler(0, 0, -90);
                     break;
                 case ArrowDirection.Down:
@@ -76,5 +75,32 @@ public class GridManager : MonoBehaviour
     public bool CanMove(ArrowController arrow)
     {
         return true;
+    }
+
+    public Vector3 GetWorldPosition(Vector2Int gridPos)
+    {
+        return grid[gridPos.x, gridPos.y].transform.position;
+    }
+
+    public Vector2Int GetNextPosition(Vector2Int  currentPosition, ArrowDirection direction)
+    {
+        switch (direction)
+        {
+            case ArrowDirection.Up:
+                return new Vector2Int(currentPosition.x + 1, currentPosition.y);
+            case ArrowDirection.Down:
+                return new Vector2Int(currentPosition.x - 1, currentPosition.y);
+            case ArrowDirection.Left:
+                return new Vector2Int(currentPosition.x, currentPosition.y - 1);
+            case ArrowDirection.Right:
+                return new Vector2Int(currentPosition.x, currentPosition.y + 1);
+            default:
+                return currentPosition;
+        }
+    }
+
+    public bool IsInsideGrid(Vector2Int position)
+    {
+        return position.x >= 0 && position.x < currentLevel.rows && position.y >= 0 && position.y < currentLevel.columns;
     }
 }
