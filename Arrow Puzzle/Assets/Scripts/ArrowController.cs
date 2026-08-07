@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class ArrowController : MonoBehaviour
@@ -13,6 +14,11 @@ public class ArrowController : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private bool isMoving = false;
     private Vector3 targetPosition;
+
+    [Header("Sprite settings")]
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Color blockedColor = Color.red;
+    [SerializeField] private Color normalColor = Color.green;
 
     private void Start()
     {
@@ -50,21 +56,28 @@ public class ArrowController : MonoBehaviour
 
     public void SelectArrow()
     {
-        if(gridManager.CanMove(this))
-        {
-            if(isMoving)
-            {
-                return;
-            }
+        Debug.Log($"Arrow at {gridPosition} selected. Direction: {direction}");
 
-            if(gridManager.CanMove(this))
-            {
-                Move(gridManager.GetExitPosition(this));
-            }
-            else
-            {
-                Debug.Log("Blocked! Cannot move in the current direction.");
-            }
+        bool canMove = gridManager.CanMove(this);
+
+        Debug.Log("Can move: " + canMove);
+
+        if (canMove)
+        {
+            Debug.Log("Moving arrow to exit position.");
+            Move(gridManager.GetExitPosition(this));
         }
+        else
+        {
+            Debug.Log("Blocked");
+            StartCoroutine(BlockedFeedback());
+        }
+    }
+
+    private IEnumerator BlockedFeedback()
+    {
+        spriteRenderer.color = blockedColor;
+        yield return new WaitForSeconds(0.5f);
+        spriteRenderer.color = normalColor;
     }
 }

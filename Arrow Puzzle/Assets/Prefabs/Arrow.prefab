@@ -238,3 +238,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ArrowController
   gridPosition: {x: 0, y: 0}
   direction: 0
+  moveSpeed: 5
+  isMoving: 0
+  spriteRenderer: {fileID: 3377260687342232898}
+  blockedColor: {r: 1, g: 0, b: 0, a: 1}
+  normalColor: {r: 0, g: 1, b: 0.18823531, a: 1}
