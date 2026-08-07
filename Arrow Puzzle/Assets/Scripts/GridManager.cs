@@ -72,9 +72,34 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public bool CanMove(ArrowController arrow)
+    public bool CanMove(ArrowController selectedArrow)
     {
-        return true;
+        Vector2Int current = selectedArrow.gridPosition;
+
+        while(true)
+        {
+            Vector2Int next = GetNextPosition(current, selectedArrow.direction);
+
+            if(!IsInsideGrid(next))
+            {
+                return true;
+            }
+
+            foreach (ArrowController arrow in FindObjectsByType<ArrowController>(FindObjectsSortMode.None))
+            {
+                if(arrow == selectedArrow)
+                {
+                    continue;
+                }
+
+                if(arrow.gridPosition == next)
+                {
+                    return false;
+                }
+            }
+
+            current = next;
+        }
     }
 
     public Vector3 GetWorldPosition(Vector2Int gridPos)
@@ -120,16 +145,16 @@ public class GridManager : MonoBehaviour
         switch (arrow.direction)
         {
             case ArrowDirection.Up:
-                exitPosition += Vector3.up * (cellSize + spacing);
+                exitPosition += Vector3.up * (cellSize + spacing) * 5;
                 break;
             case ArrowDirection.Down:
-                exitPosition += Vector3.down * (cellSize + spacing);
+                exitPosition += Vector3.down * (cellSize + spacing) * 5;
                 break;
             case ArrowDirection.Left:
-                exitPosition += Vector3.left * (cellSize + spacing);
+                exitPosition += Vector3.left * (cellSize + spacing) * 5;
                 break;
             case ArrowDirection.Right:
-                exitPosition += Vector3.right * (cellSize + spacing);
+                exitPosition += Vector3.right * (cellSize + spacing) * 5;
                 break;
         }
 

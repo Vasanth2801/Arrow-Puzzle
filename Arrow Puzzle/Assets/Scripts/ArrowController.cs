@@ -61,6 +61,10 @@ public class ArrowController : MonoBehaviour
             {
                 Move(gridManager.GetExitPosition(this));
             }
+            else
+            {
+                Debug.Log("Blocked! Cannot move in the current direction.");
+            }
         }
     }
 }
