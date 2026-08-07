@@ -43,6 +43,8 @@ public class ArrowController : MonoBehaviour
         {
             transform.position = targetPosition;
             isMoving = false;
+
+            Destroy(gameObject);
         }
     }
 
@@ -50,17 +52,14 @@ public class ArrowController : MonoBehaviour
     {
         if(gridManager.CanMove(this))
         {
-            Vector2Int nextPosition = gridManager.GetNextPosition(gridPosition, direction);
-
-            if(gridManager.IsInsideGrid(nextPosition))
+            if(isMoving)
             {
-                Move(gridManager.GetWorldPosition(nextPosition));
-                gridPosition = nextPosition;
+                return;
             }
-            else
+
+            if(gridManager.CanMove(this))
             {
-                Debug.Log("Arrow Left Grid");
-                Destroy(gameObject);
+                Move(gridManager.GetExitPosition(this));
             }
         }
     }

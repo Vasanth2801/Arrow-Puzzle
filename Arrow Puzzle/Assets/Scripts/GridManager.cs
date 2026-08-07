@@ -99,6 +99,43 @@ public class GridManager : MonoBehaviour
         }
     }
 
+    public Vector3 GetExitPosition(ArrowController arrow)
+    {
+        Vector2Int current = arrow.gridPosition;
+
+        while (true)
+        {
+            Vector2Int next = GetNextPosition(current, arrow.direction);
+
+            if (!IsInsideGrid(next))
+            {
+                break;
+            }
+
+            current = next;
+        }
+
+        Vector3 exitPosition = GetWorldPosition(current);
+
+        switch (arrow.direction)
+        {
+            case ArrowDirection.Up:
+                exitPosition += Vector3.up * (cellSize + spacing);
+                break;
+            case ArrowDirection.Down:
+                exitPosition += Vector3.down * (cellSize + spacing);
+                break;
+            case ArrowDirection.Left:
+                exitPosition += Vector3.left * (cellSize + spacing);
+                break;
+            case ArrowDirection.Right:
+                exitPosition += Vector3.right * (cellSize + spacing);
+                break;
+        }
+
+        return exitPosition;
+    }
+
     public bool IsInsideGrid(Vector2Int position)
     {
         return position.x >= 0 && position.x < currentLevel.rows && position.y >= 0 && position.y < currentLevel.columns;
