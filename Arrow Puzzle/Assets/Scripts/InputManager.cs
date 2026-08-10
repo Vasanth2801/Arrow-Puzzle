@@ -15,7 +15,6 @@ public class InputManager : MonoBehaviour
     {
         if(Input.GetMouseButtonDown(0))
         {
-            Debug.Log("Mouse Clicked");
             Vector2 mousePosition = mainCam.ScreenToWorldPoint(Input.mousePosition);
 
             RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);

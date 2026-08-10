@@ -13,6 +13,7 @@ public class ArrowController : MonoBehaviour
     [Header("Arrow movement settings")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private bool isMoving = false;
+    [SerializeField] private bool isExiting = false;
     private Vector3 targetPosition;
 
     [Header("Sprite settings")]
@@ -38,6 +39,7 @@ public class ArrowController : MonoBehaviour
 
         targetPosition = target;
         isMoving = true;
+        isExiting = true;
     }
 
     private void Update()
@@ -54,7 +56,10 @@ public class ArrowController : MonoBehaviour
             transform.position = targetPosition;
             isMoving = false;
 
-            Destroy(gameObject);
+            if (isExiting) 
+            { 
+                ExitBoard();
+            }
         }
     }
 
@@ -65,16 +70,49 @@ public class ArrowController : MonoBehaviour
             return;
         }
 
-        bool canMove = gridManager.CanMove(this);
+        Vector2Int currentPosition = gridPosition;
 
-        if (canMove)
+        while(true)
         {
-            Move(gridManager.GetExitPosition(this));
+            Vector2Int nextPosition = gridManager.GetNextPosition(currentPosition, direction);
+
+            if(!gridManager.IsInsideGrid(nextPosition))
+            {
+                Move(gridManager.GetExitPosition(this));
+                return;
+            }
+
+            ArrowController blockingArrow = gridManager.GetArrowAtPosition(nextPosition);
+
+            if(blockingArrow != null)
+            {
+                Vector3 stopPosition = gridManager.GetWorldPosition(currentPosition);
+
+                StartCoroutine(MoveToBlockedPosition(stopPosition));
+
+                gridManager.UpdateArrowPosition(this, currentPosition);
+
+                return;
+            }
+
+            currentPosition = nextPosition;
         }
-        else
+    }
+
+    private IEnumerator MoveToBlockedPosition(Vector3 target)
+    {
+        isMoving = true;
+
+        while(Vector3.Distance(transform.position, target) > 0.01f)
         {
-            StartCoroutine(BlockedFeedback());
+            transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
+            yield return null;
         }
+
+        transform.position = target;
+        isMoving = false;
+
+        StartCoroutine(BlockedFeedback());
     }
 
     private IEnumerator BlockedFeedback()
@@ -115,5 +153,11 @@ public class ArrowController : MonoBehaviour
         }
 
         transform.position = target;
+    }
+
+    private void ExitBoard()
+    {
+        gridManager.ArrowExited();
+        Destroy(gameObject);
     }
 }

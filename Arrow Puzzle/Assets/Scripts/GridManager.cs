@@ -165,4 +165,41 @@ public class GridManager : MonoBehaviour
     {
         return position.x >= 0 && position.x < currentLevel.rows && position.y >= 0 && position.y < currentLevel.columns;
     }
+
+    public ArrowController GetArrowAtPosition(Vector2Int position)
+    {
+        ArrowController[] arrows = FindObjectsByType<ArrowController>(FindObjectsSortMode.None);
+
+        foreach(ArrowController ar in arrows)
+        {
+            if(ar.gridPosition == position)
+            {
+                return ar;
+            }
+        }
+
+        return null;
+    }
+
+    public void UpdateArrowPosition(ArrowController arrow, Vector2Int newPosition)
+    {
+        arrow.gridPosition = newPosition;
+    }
+    
+    public int GetRemainingArrow()
+    {
+        return FindObjectsByType<ArrowController>(FindObjectsSortMode.None).Length - 1;
+    }
+
+    public void ArrowExited()
+    {
+        int remaining = GetRemainingArrow();
+
+        Debug.Log("Arrow Remaining: " + remaining);
+
+        if(remaining == 0)
+        {
+            GameManager.Instance.ShowWinScreen();
+        }
+    }
 }
