@@ -19,6 +19,10 @@ public class ArrowController : MonoBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Color blockedColor = Color.red;
     [SerializeField] private Color normalColor = Color.green;
+    [SerializeField] private float blockedDistance = 0.15f;
+    [SerializeField] private float blockedDuration = 0.2f;
+
+    private Vector3 originalPosition;
 
     private void Start()
     {
@@ -56,28 +60,60 @@ public class ArrowController : MonoBehaviour
 
     public void SelectArrow()
     {
-        Debug.Log($"Arrow at {gridPosition} selected. Direction: {direction}");
+        if(isMoving)
+        {
+            return;
+        }
 
         bool canMove = gridManager.CanMove(this);
 
-        Debug.Log("Can move: " + canMove);
-
         if (canMove)
         {
-            Debug.Log("Moving arrow to exit position.");
             Move(gridManager.GetExitPosition(this));
         }
         else
         {
-            Debug.Log("Blocked");
             StartCoroutine(BlockedFeedback());
         }
     }
 
     private IEnumerator BlockedFeedback()
     {
+        originalPosition = transform.position;
         spriteRenderer.color = blockedColor;
+
+        Vector3 pushPosition = originalPosition;
+
+        switch(direction)
+        {
+            case ArrowDirection.Up:
+                pushPosition += Vector3.up * blockedDistance;
+                break;
+            case ArrowDirection.Down:
+                pushPosition += Vector3.down * blockedDistance;
+                break;
+            case ArrowDirection.Left:
+                pushPosition += Vector3.left * blockedDistance;
+                break;
+            case ArrowDirection.Right:
+                pushPosition += Vector3.right * blockedDistance;
+                break;
+        }
+
+        yield return MoveToPosition(pushPosition);
         yield return new WaitForSeconds(0.5f);
+        yield return MoveToPosition(originalPosition);
         spriteRenderer.color = normalColor;
+    }
+
+    private IEnumerator MoveToPosition(Vector3 target)
+    {
+        while(Vector3.Distance(transform.position, target) > 0.01f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
+            yield return null;
+        }
+
+        transform.position = target;
     }
 }

@@ -83,7 +83,7 @@ public class GridManager : MonoBehaviour
             if(!IsInsideGrid(next))
             {
                 return true;
-            }
+            } 
 
             foreach (ArrowController arrow in FindObjectsByType<ArrowController>(FindObjectsSortMode.None))
             {
