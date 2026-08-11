@@ -7,6 +7,14 @@ public class LevelManager : MonoBehaviour
 
     private int currentLevelIndex = 0;
 
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.R))
+        {
+            RestartLevel();
+        }
+    }
+
     public Leveldata GetCurrentLevel()
     {
         return levels[currentLevelIndex];
@@ -33,5 +41,9 @@ public class LevelManager : MonoBehaviour
     public void RestartLevel()
     {
         Debug.Log($"Resetting Level {currentLevelIndex + 1}");
+
+        GridManager gridManager = FindAnyObjectByType<GridManager>();
+
+        gridManager.LoadNextLevel(GetCurrentLevel());
     }
 }
