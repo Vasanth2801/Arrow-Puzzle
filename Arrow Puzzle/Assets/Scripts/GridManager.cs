@@ -5,9 +5,12 @@ public class GridManager : MonoBehaviour
     [Header("References for the Level,arrow and the grid")]
     [SerializeField] private Cell cell;
     [SerializeField] private ArrowController arrow;
+
+    [Header("References")]
     private Leveldata currentLevel;
     private LevelManager levelManager;
-
+    [SerializeField] private LevelCompleteUI levelCompleteUI;
+    
     [Header("Spacing between the cells and the size of the cells")]
     [SerializeField] private float cellSize = 1f;
     [SerializeField] private float spacing = 0.1f;
@@ -207,7 +210,7 @@ public class GridManager : MonoBehaviour
     void LevelComplete()
     {
         Debug.Log("Level Complete!");
-        levelManager.LoadNextLevel();
+        levelCompleteUI.Show();
     }
 
     public void LoadNextLevel(Leveldata leveldata)
