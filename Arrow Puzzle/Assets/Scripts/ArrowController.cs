@@ -157,7 +157,15 @@ public class ArrowController : MonoBehaviour
 
     private void ExitBoard()
     {
-        gridManager.ArrowExited();
         Destroy(gameObject);
+
+        StartCoroutine(CheckLevelComplete());
+
+        gridManager.ArrowExited();
+    }
+
+    private IEnumerator CheckLevelComplete()
+    {
+        yield return null;
     }
 }

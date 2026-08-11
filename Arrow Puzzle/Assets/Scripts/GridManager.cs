@@ -5,7 +5,8 @@ public class GridManager : MonoBehaviour
     [Header("References for the Level,arrow and the grid")]
     [SerializeField] private Cell cell;
     [SerializeField] private ArrowController arrow;
-    [SerializeField] private Leveldata currentLevel;
+    private Leveldata currentLevel;
+    private LevelManager levelManager;
 
     [Header("Spacing between the cells and the size of the cells")]
     [SerializeField] private float cellSize = 1f;
@@ -15,6 +16,10 @@ public class GridManager : MonoBehaviour
 
     private void Start()
     {
+        levelManager = FindAnyObjectByType<LevelManager>();
+
+        currentLevel = levelManager.GetCurrentLevel();
+
         GenerateGrid();
         PlaceArrows();
     }
@@ -39,14 +44,12 @@ public class GridManager : MonoBehaviour
                 grid[i, j] = newCell;
             }
         }
-        Debug.Log($"Grid generated with {currentLevel.rows} rows and {currentLevel.columns} columns.");
     }
 
     private void PlaceArrows()
     {
         foreach(ArrowData arrowData in currentLevel.arrows)
         {
-            Debug.Log($"Placing arrow at grid position {arrowData.gridPosition} with direction {arrowData.direction}.");
             Cell targetCell = grid[arrowData.gridPosition.x, arrowData.gridPosition.y];
 
             ArrowController newArrow = Instantiate(arrow, targetCell.transform.position, Quaternion.identity, transform);
@@ -195,11 +198,33 @@ public class GridManager : MonoBehaviour
     {
         int remaining = GetRemainingArrow();
 
-        Debug.Log("Arrow Remaining: " + remaining);
-
         if(remaining == 0)
         {
-            GameManager.Instance.ShowWinScreen();
+            LevelComplete();
+        }
+    }
+
+    void LevelComplete()
+    {
+        Debug.Log("Level Complete!");
+        levelManager.LoadNextLevel();
+    }
+
+    public void LoadNextLevel(Leveldata leveldata)
+    {
+        ClearLevel();
+
+        currentLevel = leveldata;
+
+        GenerateGrid();
+        PlaceArrows();
+    }
+
+    void ClearLevel()
+    {
+        foreach(Transform child in transform)
+        {
+            Destroy(child.gameObject);
         }
     }
 }
