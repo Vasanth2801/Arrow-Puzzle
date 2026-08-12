@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class LevelGenerator : MonoBehaviour
 {
-    [Header("Generation Seetings")]
+    [Header("Generation Settings")]
     [SerializeField] private int numberOfLevels = 10;
     [SerializeField] private int rows = 9;
     [SerializeField] private int columns = 4;
@@ -18,9 +18,16 @@ public class LevelGenerator : MonoBehaviour
         for(int i = 0; i < numberOfLevels; i++)
         {
             Leveldata newLevel = CreateLevel(i);
-            generatedLevels.Add(newLevel);
-        }
 
+            if(IsLevelValid(newLevel))
+            {
+                generatedLevels.Add(newLevel);
+            }
+            else
+            {
+                i--;
+            }
+        }
         Debug.Log("Generated " + generatedLevels.Count + " Levels");
 
         return generatedLevels;
@@ -82,5 +89,61 @@ public class LevelGenerator : MonoBehaviour
         }
 
         return ArrowDirection.Up;
+    }
+
+    private bool IsLevelValid(Leveldata level)
+    {
+        HashSet<Vector2Int> positions = new HashSet<Vector2Int>();
+
+        foreach(ArrowData arrow in level.arrows)
+        {
+            if(positions.Contains(arrow.gridPosition))
+            {
+                return false;
+            }
+
+            positions.Add(arrow.gridPosition);
+        }
+
+        foreach(ArrowData arrow in level.arrows)
+        {
+            Vector2Int current = arrow.gridPosition;
+
+            while(true)
+            {
+                Vector2Int next = GetNextPosition(current, arrow.direction);
+
+                if(!IsInsideGrid(next, level))
+                {
+                    break;
+                }
+
+                current = next;
+            }
+        }
+
+        return true;
+    }
+
+    private Vector2Int GetNextPosition(Vector2Int position, ArrowDirection direction)
+    {
+        switch(direction)
+        {
+            case ArrowDirection.Up:
+                return new Vector2Int(position.x + 1, position.y);
+            case ArrowDirection.Down:
+                return new Vector2Int(position.x - 1, position.y);
+            case ArrowDirection.Left:
+                return new Vector2Int(position.x, position.y - 1);
+            case ArrowDirection.Right:
+                return new Vector2Int(position.x, position.y+1);
+        }
+
+        return position;
+    }
+
+    private bool IsInsideGrid(Vector2Int position, Leveldata level)
+    {
+        return position.x >= 0 && position.x < level.rows && position.y > 0 && position.y < level.columns;
     }
 }

@@ -1181,6 +1181,7 @@ MonoBehaviour:
   levels:
   - {fileID: 11400000, guid: a72433c031b2f0840865091890b73636, type: 2}
   - {fileID: 11400000, guid: 9c7160030d529404d858dde8012eb764, type: 2}
+  levelGenerator: {fileID: 2115969782}
 --- !u!4 &1645320881
 Transform:
   m_ObjectHideFlags: 0
@@ -1328,7 +1329,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d6923b3b87a4304baea7858a743201a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelGenerator
-  numberOfLevels: 10
+  numberOfLevels: 2000
   rows: 9
   columns: 4
   levelManager: {fileID: 1645320880}
