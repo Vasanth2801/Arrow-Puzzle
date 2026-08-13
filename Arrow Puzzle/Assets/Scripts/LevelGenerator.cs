@@ -10,6 +10,12 @@ public class LevelGenerator : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private LevelManager levelManager;
+    [SerializeField] private LevelValidator levelValidator;
+
+    private void Start()
+    {
+        levelValidator = FindAnyObjectByType<LevelValidator>();
+    }
 
     public List<Leveldata> GenerateLevels()
     {
@@ -19,7 +25,7 @@ public class LevelGenerator : MonoBehaviour
         {
             Leveldata newLevel = CreateLevel(i);
 
-            if(IsLevelValid(newLevel))
+            if(levelValidator.IsLevelSolvable(newLevel))
             {
                 generatedLevels.Add(newLevel);
             }

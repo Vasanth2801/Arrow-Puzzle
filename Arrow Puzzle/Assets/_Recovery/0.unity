@@ -1373,7 +1373,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d6923b3b87a4304baea7858a743201a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelGenerator
-  numberOfLevels: 10
+  numberOfLevels: 2000
   rows: 9
   columns: 4
   levelManager: {fileID: 1645320880}
