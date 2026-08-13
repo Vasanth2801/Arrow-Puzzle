@@ -46,7 +46,7 @@ public class LevelGenerator : MonoBehaviour
         level.rows = rows;
         level.columns = columns;
 
-        int arrowCount = 2 + levelNumber;
+        int arrowCount = GetArrowCount(levelNumber);
 
         if(arrowCount > rows * columns)
         {
@@ -76,6 +76,36 @@ public class LevelGenerator : MonoBehaviour
         }
 
         return level;
+    }
+
+    private int GetArrowCount(int levelNumber)
+    {
+        if(levelNumber < 10)
+        {
+            return Random.Range(2, 4);
+        }
+        else if(levelNumber < 25)
+        {
+            return Random.Range(3, 6);
+        }
+        else if(levelNumber < 50)
+        {
+            return Random.Range(4, 8);
+        }
+        else if(levelNumber < 100)
+        {
+            return Random.Range(5, 10);
+        }
+        else if(levelNumber < 250)
+        {
+            return Random.Range(6, 12);
+        }
+        else if(levelNumber < 250)
+        {
+            return Random.Range(7, 14);
+        }
+
+        return Random.Range(8, 16);
     }
 
     private ArrowDirection GetRandomDirection()
