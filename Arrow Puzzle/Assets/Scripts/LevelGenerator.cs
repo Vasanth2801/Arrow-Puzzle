@@ -8,6 +8,9 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] private int rows = 9;
     [SerializeField] private int columns = 4;
 
+    [Header("Difficulty")]
+    [SerializeField] private int chainLength = 3;
+
     [Header("References")]
     [SerializeField] private LevelManager levelManager;
     [SerializeField] private LevelValidator levelValidator;
@@ -21,91 +24,150 @@ public class LevelGenerator : MonoBehaviour
     {
         List<Leveldata> generatedLevels = new List<Leveldata>();
 
-        for(int i = 0; i < numberOfLevels; i++)
-        {
-            Leveldata newLevel = CreateLevel(i);
+        int attempts = 0;
+        int maxAttempts = numberOfLevels * 100;
 
-            if(levelValidator.IsLevelSolvable(newLevel))
+        while (generatedLevels.Count < numberOfLevels && attempts < maxAttempts) 
+        {
+            attempts++;
+
+            Leveldata level = CreateLevel();
+
+            if(levelValidator.IsLevelSolvable(level))
             {
-                generatedLevels.Add(newLevel);
-            }
-            else
-            {
-                i--;
+                generatedLevels.Add(level);
+
+                Debug.Log("Generated valid levels " + generatedLevels.Count);
             }
         }
-        Debug.Log("Generated " + generatedLevels.Count + " Levels");
+
+        Debug.Log("Generated " + generatedLevels.Count + "valid Levels");
 
         return generatedLevels;
     }
 
-    private Leveldata CreateLevel(int levelNumber)
+    private Leveldata CreateLevel()
     {
         Leveldata level = ScriptableObject.CreateInstance<Leveldata>();
 
         level.rows = rows;
         level.columns = columns;
 
-        int arrowCount = GetArrowCount(levelNumber);
-
-        if(arrowCount > rows * columns)
-        {
-            arrowCount = rows * columns;
-        }
+        int arrowCount = GetArrowCount();
 
         level.arrows = new ArrowData[arrowCount];
 
         HashSet<Vector2Int> usedPositions = new HashSet<Vector2Int>();
 
-        for(int i = 0;i < arrowCount;i++)
-        {
-            Vector2Int position;
+        ArrowDirection chainDirection = GetRandomDirection();
 
-            do
+        Vector2Int startPosition = GetValidStartPosition(chainDirection);
+
+        for(int i =0; i< arrowCount; i++)
+        {
+            Vector2Int position = new Vector2Int(startPosition.x, startPosition.y);
+
+            position.x += GetRowOffset(chainDirection, i);
+
+            if (!IsInsideGrid(position))
             {
-               position = new Vector2Int(Random.Range(0,rows), Random.Range(0,columns));
-            } while (usedPositions.Contains(position));
+                position = GetRandomFreePosition(usedPositions);
+            }
+
+            if(usedPositions.Contains(position))
+            {
+                position = GetRandomFreePosition(usedPositions);
+            }
 
             usedPositions.Add(position);
 
             ArrowData arrow = new ArrowData();
-            arrow.gridPosition = position;
-            arrow.direction = GetRandomDirection();
 
-            level.arrows[i] = arrow;  
+            arrow.gridPosition = position;
+
+            arrow.direction = chainDirection;
+
+            level.arrows[i] = arrow;
         }
 
         return level;
     }
 
-    private int GetArrowCount(int levelNumber)
+    private int GetArrowCount()
     {
-        if(levelNumber < 10)
+        int minimum = Mathf.Max(2, chainLength);
+
+        int maximum = Mathf.Min(minimum + 2, rows * columns);
+
+        return Random.Range(minimum, maximum + 1);
+    }
+
+    private Vector2Int GetValidStartPosition(ArrowDirection direction)
+    {
+        switch(direction)
         {
-            return Random.Range(2, 4);
-        }
-        else if(levelNumber < 25)
-        {
-            return Random.Range(3, 6);
-        }
-        else if(levelNumber < 50)
-        {
-            return Random.Range(4, 8);
-        }
-        else if(levelNumber < 100)
-        {
-            return Random.Range(5, 10);
-        }
-        else if(levelNumber < 250)
-        {
-            return Random.Range(6, 12);
-        }
-        else if(levelNumber < 250)
-        {
-            return Random.Range(7, 14);
+            case ArrowDirection.Up:
+                return new Vector2Int(Random.Range(0, rows), Random.Range(0, columns));
+            case ArrowDirection.Down:
+                return new Vector2Int(Random.Range(0, rows), Random.Range(0, columns));
+            case ArrowDirection.Left:
+                return new Vector2Int(Random.Range(0, rows), Random.Range(0, columns));
+            case ArrowDirection.Right:
+                return new Vector2Int(Random.Range(0, rows), Random.Range(0, columns));
         }
 
-        return Random.Range(8, 16);
+        return Vector2Int.zero;
+    }
+
+    private int GetRowOffset(ArrowDirection direction, int index)
+    {
+        if(direction == ArrowDirection.Up)
+        {
+            return index;
+        }
+
+        if(direction == ArrowDirection.Down)
+        {
+            return -index;   
+        }
+
+        return 0;
+    }
+
+    private int GetColumnOffSet(ArrowDirection direction, int index)
+    {
+        if(direction == ArrowDirection.Right)
+        {
+            return index;
+        }
+
+        if(direction == ArrowDirection.Left)
+        {
+            return -index;
+        }
+
+        return 0;
+    }
+
+    private Vector2Int GetRandomFreePosition(HashSet<Vector2Int> usedPositions)
+    {
+        Vector2Int position;
+
+        int attempts = 0;
+
+        do
+        {
+            position = new Vector2Int(Random.Range(0, rows), Random.Range(0, columns));
+            attempts++;
+
+        } while (usedPositions.Contains(position) && attempts < 100);
+
+        return position;
+    }
+
+    private bool IsInsideGrid(Vector2Int position)
+    {
+        return position.x >= 0 && position.x < rows && position.y >= 0 && position.y < columns;
     }
 
     private ArrowDirection GetRandomDirection()
@@ -125,61 +187,5 @@ public class LevelGenerator : MonoBehaviour
         }
 
         return ArrowDirection.Up;
-    }
-
-    private bool IsLevelValid(Leveldata level)
-    {
-        HashSet<Vector2Int> positions = new HashSet<Vector2Int>();
-
-        foreach(ArrowData arrow in level.arrows)
-        {
-            if(positions.Contains(arrow.gridPosition))
-            {
-                return false;
-            }
-
-            positions.Add(arrow.gridPosition);
-        }
-
-        foreach(ArrowData arrow in level.arrows)
-        {
-            Vector2Int current = arrow.gridPosition;
-
-            while(true)
-            {
-                Vector2Int next = GetNextPosition(current, arrow.direction);
-
-                if(!IsInsideGrid(next, level))
-                {
-                    break;
-                }
-
-                current = next;
-            }
-        }
-
-        return true;
-    }
-
-    private Vector2Int GetNextPosition(Vector2Int position, ArrowDirection direction)
-    {
-        switch(direction)
-        {
-            case ArrowDirection.Up:
-                return new Vector2Int(position.x + 1, position.y);
-            case ArrowDirection.Down:
-                return new Vector2Int(position.x - 1, position.y);
-            case ArrowDirection.Left:
-                return new Vector2Int(position.x, position.y - 1);
-            case ArrowDirection.Right:
-                return new Vector2Int(position.x, position.y+1);
-        }
-
-        return position;
-    }
-
-    private bool IsInsideGrid(Vector2Int position, Leveldata level)
-    {
-        return position.x >= 0 && position.x < level.rows && position.y > 0 && position.y < level.columns;
     }
 }
