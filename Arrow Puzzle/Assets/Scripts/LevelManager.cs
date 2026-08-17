@@ -5,48 +5,21 @@ public class LevelManager : MonoBehaviour
 {
     [Header("Manual Level")]
     [SerializeField] private Leveldata[] levels;
-
-    [Header("Generator")]
-    [SerializeField] private LevelGenerator levelGenerator;
-
-    private List<Leveldata> allLevels = new List<Leveldata>();
-
     private int currentLevelIndex = 0;
 
-    private void Start()
+    private void Awake()
     {
-        GenerateLevels();
-    }
+        levels = Resources.LoadAll<Leveldata>("Levels/Generated");
 
-    private void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.R))
+        if(levels == null || levels.Length == 0)
         {
-            RestartLevel();
-        }
-    }
-
-    void GenerateLevels()
-    {
-        allLevels.Clear();
-
-        if(levels != null)
-        {
-            foreach(Leveldata level in levels)
-            {
-                allLevels.Add(level);
-            }
+            Debug.LogError("No generated Levels Found");
         }
 
-        if(levelGenerator != null)
-        {
-            List<Leveldata> generatedLevels = levelGenerator.GenerateLevels();
+        SortLevel();
 
-            allLevels.AddRange(generatedLevels);
-        }
-
-        Debug.Log("Total Levels: " + allLevels.Count);
-    }
+        Debug.Log("Loaded " + levels.Length + " levels");
+    } 
 
     public Leveldata GetCurrentLevel()
     {
@@ -59,18 +32,20 @@ public class LevelManager : MonoBehaviour
 
         if(currentLevelIndex >= levels.Length)
         {
-            Debug.Log("All levels completed!");
+            Debug.Log("All Levels Completed");
+
             currentLevelIndex = levels.Length - 1;
+
             return;
         }
 
-        Debug.Log($"Loading Level {currentLevelIndex + 1}");
+        Debug.Log("Loading Level " + currentLevelIndex + 1);
 
         GridManager gridManager = FindAnyObjectByType<GridManager>();
 
         gridManager.LoadNextLevel(GetCurrentLevel());
     }
-
+    
     public void RestartLevel()
     {
         Debug.Log($"Resetting Level {currentLevelIndex + 1}");
@@ -87,6 +62,11 @@ public class LevelManager : MonoBehaviour
 
     public int GetTotallevelCount()
     {
-        return allLevels.Count;
+        return levels.Length;
+    }
+
+    private void SortLevel()
+    {
+        System.Array.Sort(levels, (a, b) => string.Compare(a.name, b.name));
     }
 }
