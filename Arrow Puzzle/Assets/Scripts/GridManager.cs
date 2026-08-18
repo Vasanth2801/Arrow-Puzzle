@@ -199,19 +199,35 @@ public class GridManager : MonoBehaviour
 
     public void ArrowExited()
     {
-        int remaining = GetRemainingArrow();
+        ArrowController[] remainingArrows = FindObjectsByType<ArrowController>(FindObjectsSortMode.None);
 
-        if(remaining == 0)
+        Debug.Log($"Remaining Arrows : {remainingArrows.Length - 1}");
+
+        if(remainingArrows.Length-1 == 0)
         {
-            LevelComplete();
+            Debug.Log("Level Complete");
+
+            if(levelCompleteUI != null)
+            {
+                levelCompleteUI.Show();
+            }
+
+            LevelManager levelManager = FindAnyObjectByType<LevelManager>();
+
+            if(levelManager != null)
+            {
+                levelManager.LoadNextLevel();
+            }
         }
     }
 
-    void LevelComplete()
+    public bool IsLevelComplete()
     {
-        Debug.Log("Level Complete!");
-        levelCompleteUI.Show();
+        ArrowController[] arrows = FindObjectsByType<ArrowController>(FindObjectsSortMode.None);
+
+        return arrows.Length == 0;
     }
+
 
     public void LoadNextLevel(Leveldata leveldata)
     {

@@ -15,9 +15,9 @@ MonoBehaviour:
   rows: 9
   columns: 4
   arrows:
-  - gridPosition: {x: 5, y: 1}
-    direction: 0
+  - gridPosition: {x: 7, y: 3}
+    direction: 2
   - gridPosition: {x: 7, y: 2}
-    direction: 3
-  - gridPosition: {x: 4, y: 3}
+    direction: 2
+  - gridPosition: {x: 7, y: 1}
     direction: 2

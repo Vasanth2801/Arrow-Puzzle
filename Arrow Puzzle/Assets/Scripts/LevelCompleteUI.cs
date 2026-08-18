@@ -1,9 +1,10 @@
-using System;
+using TMPro;
 using UnityEngine;
 
 public class LevelCompleteUI : MonoBehaviour
 {
     [SerializeField] private GameObject panel;
+    [SerializeField] private TextMeshProUGUI levelText;
     private LevelManager levelManager;
 
     private void Start()
@@ -11,17 +12,36 @@ public class LevelCompleteUI : MonoBehaviour
         levelManager = FindAnyObjectByType<LevelManager>();
 
         panel.SetActive(false);
+
+        UpdateLevelText();
     }
 
     public void Show()
     {
+        UpdateLevelText();
+
         panel.SetActive(true);
     }
 
     public void NextLevel()
     {
         panel.SetActive(false);
-        levelManager.LoadNextLevel();
+        if(levelManager != null)
+        {
+            levelManager.LoadNextLevel();
+
+            UpdateLevelText();
+        }
+    }
+
+    void UpdateLevelText()
+    {
+        if(levelManager == null)
+        {
+            return;
+        }
+
+        levelText.text = "Level 0 " + levelManager.GetCurrentLevelNumber();
     }
 
     public void RestartLevel()

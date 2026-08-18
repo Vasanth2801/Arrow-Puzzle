@@ -144,7 +144,7 @@ public class ArrowController : MonoBehaviour
         spriteRenderer.color = normalColor;
     }
 
-    private IEnumerator MoveToPosition(Vector3 target)
+    private IEnumerator MoveToPosition(Vector3 target)  
     {
         while(Vector3.Distance(transform.position, target) > 0.01f)
         {
@@ -157,15 +157,8 @@ public class ArrowController : MonoBehaviour
 
     private void ExitBoard()
     {
-        Destroy(gameObject);
-
-        StartCoroutine(CheckLevelComplete());
-
         gridManager.ArrowExited();
-    }
 
-    private IEnumerator CheckLevelComplete()
-    {
-        yield return null;
+        Destroy(gameObject);
     }
 }

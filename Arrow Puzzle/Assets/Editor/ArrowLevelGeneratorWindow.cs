@@ -55,6 +55,11 @@ public class ArrowLevelGeneratorWindow : EditorWindow
             attempts++;
 
             Leveldata level = CreateLevel(generated);
+
+            if(level == null)
+            {
+                continue;
+            }
             
             if(!IsLevelSolvable(level))
             {
@@ -92,21 +97,42 @@ public class ArrowLevelGeneratorWindow : EditorWindow
         level.rows = rows;
         level.columns = columns;
 
-        int arrowCount = Mathf.Clamp(chainLength + levelNumber / 10, 2, rows * columns);
+        int arrowCount = GetArrowCount(levelNumber);
 
         level.arrows = new ArrowData[arrowCount];
 
         HashSet<Vector2Int> usedPositions = new HashSet<Vector2Int>();
 
-        for (int i = 0; i < arrowCount; i++)
+        ArrowDirection chainDirection = GetRandomDirection();
+
+        int actualChainLength = Mathf.Min(chainLength, arrowCount);
+
+        Vector2Int chainStart = GetValidChainStart(chainDirection, actualChainLength);
+
+        if (chainStart == new Vector2Int(-1, -1))
         {
-            Vector2Int position;
+            DestroyImmediate(level);
+            return null;
+        }
 
-            do
-            {
-                position = new Vector2Int(Random.Range(0, rows), Random.Range(0, columns));
-            } while (usedPositions.Contains(position));
+        for (int i = 0; i < actualChainLength; i++)
+        {
+            Vector2Int position = GetChainPosition(chainStart, chainDirection, i);
 
+            ArrowData arrow = new ArrowData();
+
+            arrow.gridPosition = position;
+
+            arrow.direction = chainDirection;
+
+            level.arrows[i] = arrow;
+
+            usedPositions.Add(position);
+        }
+
+        for(int i = actualChainLength; i < arrowCount; i++)
+        {
+            Vector2Int position = GetRandomFreePositions(usedPositions);
 
             usedPositions.Add(position);
 
@@ -114,13 +140,85 @@ public class ArrowLevelGeneratorWindow : EditorWindow
 
             arrow.gridPosition = position;
 
-            arrow.direction = GetRandomDirection();
+           arrow.direction = GetRandomDirection();
 
             level.arrows[i] = arrow;
         }
 
         return level;
     }
+
+    private Vector2Int GetValidChainStart(ArrowDirection direction, int length)
+    {
+        List<Vector2Int> possibleStarts = new List<Vector2Int>();
+
+        for(int row = 0; row < rows; row++)
+        {
+            for(int col = 0;  col < columns; col++)
+            {
+                Vector2Int start = new Vector2Int(row, col);
+
+                bool valid = true;
+
+                for (int i = 0; i < length; i++)
+                {
+                    Vector2Int position = GetChainPosition(start, direction, i);
+
+                    if (!IsInsideGrid(position))
+                    {
+                        valid = false;
+                        break;
+                    }
+                }
+
+                if(valid)
+                {
+                    possibleStarts.Add(start);
+                }
+            }
+        }
+
+        if(possibleStarts.Count == 0)
+        {
+            return new Vector2Int(-1, -1);
+        }
+
+        return possibleStarts[Random.Range(0, possibleStarts.Count)];
+    }
+
+    private Vector2Int GetChainPosition(Vector2Int start, ArrowDirection direction, int index)
+    {
+        switch(direction)
+        {
+            case ArrowDirection.Up:
+                return new Vector2Int(start.x + index , start.y);
+            case ArrowDirection.Down:
+                return new Vector2Int(start.x - index, start.y);
+            case ArrowDirection.Right:
+                return new Vector2Int(start.x, start.y + index);
+            case ArrowDirection.Left:
+                return new Vector2Int(start.x, start.y  - index);
+        }
+
+        return start;
+    }
+
+    private Vector2Int GetRandomFreePositions(HashSet<Vector2Int> usedPositions)
+    {
+        Vector2Int position;
+
+        int attempts = 0;
+
+        do
+        {
+            position = new Vector2Int(Random.Range(0, rows), Random.Range(0, columns));
+
+            attempts++;
+        } while (usedPositions.Contains(position) && attempts < 100);
+
+        return position;
+    }
+
 
     private bool IsLevelSolvable(Leveldata level)
     {
@@ -159,7 +257,7 @@ public class ArrowLevelGeneratorWindow : EditorWindow
         {
             Vector2Int next = ArrowUtility.GetNextPosition(current, arrow.direction);
             
-            if(!IsInsideGrid(next, level))
+            if(!IsInsideGrid(next))
             {
                 return true;
             }
@@ -176,9 +274,9 @@ public class ArrowLevelGeneratorWindow : EditorWindow
         }
     }
 
-    private bool IsInsideGrid(Vector2Int position, Leveldata level)
+    private bool IsInsideGrid(Vector2Int position)
     {
-        return position.x >= 0 && position.x < level.rows && position.y >= 0 && position.y < level.columns;
+        return position.x >= 0 && position.x < rows && position.y >= 0 && position.y < columns;
     }
 
     private ArrowDirection GetRandomDirection()
@@ -198,6 +296,35 @@ public class ArrowLevelGeneratorWindow : EditorWindow
         }
 
         return ArrowDirection.Up;
+    }
+
+    private int GetArrowCount(int levelNumber)
+    {
+
+        int level = levelNumber + 1;
+
+        if(levelNumber <= 10)
+        {
+            return Random.Range(2, 5);
+        }
+        else if(levelNumber <= 50)
+        {
+            return Random.Range(4, 7);
+        }
+        else if(levelNumber <= 100)
+        {
+            return Random.Range(5, 11);
+        }
+        else if(levelNumber <= 250)
+        {
+            return Random.Range(6, 11);
+        }
+        else if(levelNumber <= 500)
+        {
+            return Random.Range(8, 14);
+        }
+
+        return Random.Range(10, 17);
     }
 
     private void CreateFolderIfNeeded()
