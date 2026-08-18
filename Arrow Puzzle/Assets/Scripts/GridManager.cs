@@ -211,13 +211,6 @@ public class GridManager : MonoBehaviour
             {
                 levelCompleteUI.Show();
             }
-
-            LevelManager levelManager = FindAnyObjectByType<LevelManager>();
-
-            if(levelManager != null)
-            {
-                levelManager.LoadNextLevel();
-            }
         }
     }
 

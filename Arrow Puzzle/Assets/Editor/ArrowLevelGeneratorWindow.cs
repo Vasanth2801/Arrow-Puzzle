@@ -301,7 +301,7 @@ public class ArrowLevelGeneratorWindow : EditorWindow
     private int GetArrowCount(int levelNumber)
     {
 
-        int level = levelNumber + 1;
+        //int level = levelNumber + 1;
 
         if(levelNumber <= 10)
         {
