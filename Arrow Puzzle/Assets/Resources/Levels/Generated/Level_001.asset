@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Leveldata
   rows: 9
   columns: 4
+  speed: 12345
+  difficulty: 1
   arrows:
+  - gridPosition: {x: 3, y: 1}
+    direction: 3
   - gridPosition: {x: 4, y: 2}
-    direction: 2
-  - gridPosition: {x: 4, y: 1}
-    direction: 2
+    direction: 1
