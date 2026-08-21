@@ -14,6 +14,10 @@ public class ArrowLevelGeneratorWindow : EditorWindow
     private string saveFolder = "Assets/Resources/Levels/Generated";
     private HashSet<string> generatedFingerPrints = new HashSet<string>();
 
+    private int rejectedUnsolvable;
+    private int rejectedDuplicate;
+    private int rejectedGenerationFailure;
+
     [MenuItem("ArrowGame/LevelGenerator")]
     public static void ShowWindow()
     {
@@ -71,6 +75,10 @@ public class ArrowLevelGeneratorWindow : EditorWindow
 
         generatedFingerPrints.Clear();
 
+        rejectedUnsolvable = 0;
+        rejectedDuplicate = 0;
+        rejectedGenerationFailure = 0;
+
 
         CreateFolderIfNeeded();
 
@@ -87,11 +95,14 @@ public class ArrowLevelGeneratorWindow : EditorWindow
 
             if(level == null)
             {
+                rejectedGenerationFailure++;
                 continue;
             }
             
             if(!IsLevelSolvable(level))
             {
+                rejectedUnsolvable++;
+
                 DestroyImmediate(level);
                 continue;
             }
@@ -100,6 +111,8 @@ public class ArrowLevelGeneratorWindow : EditorWindow
 
             if(generatedFingerPrints.Contains(fingerPrint))
             {
+                rejectedDuplicate++;    
+
                 DestroyImmediate(level);
 
                 continue;
@@ -263,23 +276,6 @@ public class ArrowLevelGeneratorWindow : EditorWindow
         return 6;
     }
           
-    private Vector2Int GetRandomFreePositions(HashSet<Vector2Int> usedPositions)
-    {
-        Vector2Int position;
-
-        int attempts = 0;
-
-        do
-        {
-            position = new Vector2Int(Random.Range(0, rows), Random.Range(0, columns));
-
-            attempts++;
-        } while (usedPositions.Contains(position) && attempts < 100);
-
-        return position;
-    }
-
-
     private bool IsLevelSolvable(Leveldata level)
     {
         List<ArrowData> remaining = new List<ArrowData>(level.arrows);
@@ -531,14 +527,15 @@ public class ArrowLevelGeneratorWindow : EditorWindow
     private bool TryCreateChain(ArrowData[] arrows, int startIndex, int chainLength, HashSet<Vector2Int> usedPositions)
     {
         List<ArrowDirection> directions = new List<ArrowDirection>();
+        {
+            directions.Add(ArrowDirection.Up);
 
-        directions.Add(ArrowDirection.Up);
+            directions.Add(ArrowDirection.Right);
 
-        directions.Add(ArrowDirection.Right);
+            directions.Add(ArrowDirection.Down);
 
-        directions.Add(ArrowDirection.Down);
-
-        directions.Add(ArrowDirection.Left);
+            directions.Add(ArrowDirection.Left);
+        }
 
         for (int i = directions.Count - 1; i > 0; i--)
         {

@@ -3,70 +3,99 @@ using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
-    [Header("Manual Level")]
-    [SerializeField] private Leveldata[] levels;
-    private int currentLevelIndex = 0;
+    public static LevelManager instance;
+
+    [Header("Level Settings")]
+    [SerializeField] private string levelFolder = "Levels/Generatoed";
+    [SerializeField] private int currentLevel = 0;
+
+    [Header("References")]
+    [SerializeField] private GridManager gridManager;
+    private Leveldata currentLevelData;
 
     private void Awake()
     {
-        levels = Resources.LoadAll<Leveldata>("Levels/Generated");
-
-        if(levels == null || levels.Length == 0)
+        if(instance != null && instance != this)
         {
-            Debug.LogError("No generated Levels Found");
+            Destroy(gameObject);
+            return;
         }
 
-        SortLevel();
-
-        Debug.Log("Loaded " + levels.Length + " levels");
-    } 
-
-    public Leveldata GetCurrentLevel()
-    {
-        return levels[currentLevelIndex];
+        instance = this;
     }
 
-    public void LoadNextLevel()
+    private void Start()
     {
-        currentLevelIndex++;
+        LoadLevel(currentLevel);
+    }
 
-        if(currentLevelIndex >= levels.Length)
+    public void LoadLevel(int levelNumber)
+    {
+        string levelName = "Level " + levelNumber.ToString("000");
+
+        Leveldata level = Resources.Load<Leveldata>(levelFolder + "/ " + levelName);
+
+        if(level == null)
         {
-            Debug.Log("All Levels Completed");
-
-            currentLevelIndex = levels.Length - 1;
+            Debug.LogError("Could not load level " + levelName);
 
             return;
         }
 
-        Debug.Log("Loading Level " + currentLevelIndex + 1);
+        currentLevel = levelNumber;
 
-        GridManager gridManager = FindAnyObjectByType<GridManager>();
+        currentLevelData = level;
 
-        gridManager.LoadNextLevel(GetCurrentLevel());
-    }
-    
-    public void RestartLevel()
-    {
-        Debug.Log($"Resetting Level {currentLevelIndex + 1}");
+        Debug.Log("Loading Level " + currentLevel);
 
-        GridManager gridManager = FindAnyObjectByType<GridManager>();
+        if(gridManager == null)
+        {
+            gridManager = FindAnyObjectByType<GridManager>();
+        }
 
-        gridManager.LoadNextLevel(GetCurrentLevel());
-    }
+        if(gridManager == null)
+        {
+            Debug.LogError("GridManager not found ");
 
-    public int GetCurrentLevelNumber()
-    {
-        return currentLevelIndex + 1;
-    }
+            return;
+        }
 
-    public int GetTotallevelCount()
-    {
-        return levels.Length;
+        gridManager.LoadLevel(currentLevelData);
     }
 
-    private void SortLevel()
+    public void LoadNextLevel()
     {
-        System.Array.Sort(levels, (a, b) => string.Compare(a.name, b.name));
+        int nextLevel = currentLevel + 1;
+
+        Leveldata next = Resources.Load<Leveldata>(levelFolder + "/Level_ " + nextLevel.ToString("000"));
+
+        if(next == null)
+        {
+            Debug.Log("No more Levels Avaialble");
+
+            return;
+        }
+
+        LoadLevel(nextLevel);
+    }
+
+    public void LoadPreviousLevel()
+    {
+        if(currentLevel <= 1)
+        {
+            return;
+        }
+
+        LoadLevel(currentLevel - 1);
+    }
+
+    public int GetCurrentLevel()
+    {
+        return currentLevel;
+    }
+
+    public Leveldata GetCurrentLeveldata()
+    {
+        return currentLevelData;
     }
 }

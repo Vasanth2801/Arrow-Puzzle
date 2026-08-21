@@ -222,7 +222,7 @@ public class GridManager : MonoBehaviour
     }
 
 
-    public void LoadNextLevel(Leveldata leveldata)
+    public void LoadLevel(Leveldata leveldata)
     {
         ClearLevel();
 
