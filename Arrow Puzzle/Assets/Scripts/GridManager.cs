@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
@@ -17,14 +18,29 @@ public class GridManager : MonoBehaviour
 
     private Cell[,] grid;
 
-    private void Start()
-    {
-        levelManager = FindAnyObjectByType<LevelManager>();
+    private Dictionary<Vector2Int, ArrowController> arrows = new Dictionary<Vector2Int, ArrowController>();
 
-        currentLevel = levelManager.GetCurrentLevel();
+    public void LoadLevel(Leveldata level)
+    {
+        ClearLevel();
+
+        currentLevel = level;
 
         GenerateGrid();
+
         PlaceArrows();
+    }
+
+    private void ClearGrid()
+    {
+        foreach(Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        arrows.Clear();
+
+        grid = null;
     }
 
     private void GenerateGrid()
@@ -78,6 +94,25 @@ public class GridManager : MonoBehaviour
         }
     }
 
+    private void SetArrowRotation(ArrowController arrow, ArrowDirection direction)
+    {
+        switch(direction)
+        {
+            case ArrowDirection.Up:
+                arrow.transform.rotation = Quaternion.Euler(0, 0, 0);
+                break;
+            case ArrowDirection.Right:
+                arrow.transform.rotation = Quaternion.Euler(0, 0, -90);
+                break;
+            case ArrowDirection.Down:
+                arrow.transform.rotation = Quaternion.Euler(0, 0, 180);
+                break;
+            case ArrowDirection.Left:
+                arrow.transform.rotation = Quaternion.Euler(0, 0, 90);
+                break;
+        }
+    }
+
     public bool CanMove(ArrowController selectedArrow)
     {
         Vector2Int current = selectedArrow.gridPosition;
@@ -113,58 +148,30 @@ public class GridManager : MonoBehaviour
         return grid[gridPos.x, gridPos.y].transform.position;
     }
 
-    public Vector2Int GetNextPosition(Vector2Int  currentPosition, ArrowDirection direction)
+    public Vector2Int GetNextPosition(Vector2Int  position, ArrowDirection direction)
     {
-        switch (direction)
-        {
-            case ArrowDirection.Up:
-                return new Vector2Int(currentPosition.x + 1, currentPosition.y);
-            case ArrowDirection.Down:
-                return new Vector2Int(currentPosition.x - 1, currentPosition.y);
-            case ArrowDirection.Left:
-                return new Vector2Int(currentPosition.x, currentPosition.y - 1);
-            case ArrowDirection.Right:
-                return new Vector2Int(currentPosition.x, currentPosition.y + 1);
-            default:
-                return currentPosition;
-        }
+        return ArrowUtility.GetNextPosition(position, direction);
     }
 
     public Vector3 GetExitPosition(ArrowController arrow)
     {
-        Vector2Int current = arrow.gridPosition;
+        Vector3 current = arrow.transform.position;
 
-        while (true)
-        {
-            Vector2Int next = GetNextPosition(current, arrow.direction);
+        float distance = 2f;
 
-            if (!IsInsideGrid(next))
-            {
-                break;
-            }
-
-            current = next;
-        }
-
-        Vector3 exitPosition = GetWorldPosition(current);
-
-        switch (arrow.direction)
+        switch(arrow.direction)
         {
             case ArrowDirection.Up:
-                exitPosition += Vector3.up * (cellSize + spacing) * 5;
-                break;
+                return current + Vector3.up * distance;
             case ArrowDirection.Down:
-                exitPosition += Vector3.down * (cellSize + spacing) * 5;
-                break;
+                return current + Vector3.down * distance;
             case ArrowDirection.Left:
-                exitPosition += Vector3.left * (cellSize + spacing) * 5;
-                break;
+                return current + Vector3.left * distance;
             case ArrowDirection.Right:
-                exitPosition += Vector3.right * (cellSize + spacing) * 5;
-                break;
+                return current + Vector3.right * distance;
         }
 
-        return exitPosition;
+        return current;
     }
 
     public bool IsInsideGrid(Vector2Int position)
@@ -174,14 +181,9 @@ public class GridManager : MonoBehaviour
 
     public ArrowController GetArrowAtPosition(Vector2Int position)
     {
-        ArrowController[] arrows = FindObjectsByType<ArrowController>(FindObjectsSortMode.None);
-
-        foreach(ArrowController ar in arrows)
+        if(arrows.ContainsKey(position))
         {
-            if(ar.gridPosition == position)
-            {
-                return ar;
-            }
+            return arrows[position];
         }
 
         return null;
@@ -189,7 +191,14 @@ public class GridManager : MonoBehaviour
 
     public void UpdateArrowPosition(ArrowController arrow, Vector2Int newPosition)
     {
+        if(arrows.ContainsKey(arrow.gridPosition))
+        {
+            arrows.Remove(arrow.gridPosition);
+        }
+
         arrow.gridPosition = newPosition;
+
+        arrows[newPosition] = arrow;
     }
     
     public int GetRemainingArrow()
@@ -199,14 +208,15 @@ public class GridManager : MonoBehaviour
 
     public void ArrowExited()
     {
-        ArrowController[] remainingArrows = FindObjectsByType<ArrowController>(FindObjectsSortMode.None);
+        if(arrows.ContainsKey(arrow.gridPosition))
+        {
+            arrows.Remove(arrow.gridPosition);
+        }
 
-        Debug.Log($"Remaining Arrows : {remainingArrows.Length - 1}");
-
-        if(remainingArrows.Length-1 == 0)
+        if(arrows.Count == 0)
         {
             Debug.Log("Level Complete");
-
+            
             if(levelCompleteUI != null)
             {
                 levelCompleteUI.Show();
@@ -219,17 +229,6 @@ public class GridManager : MonoBehaviour
         ArrowController[] arrows = FindObjectsByType<ArrowController>(FindObjectsSortMode.None);
 
         return arrows.Length == 0;
-    }
-
-
-    public void LoadLevel(Leveldata leveldata)
-    {
-        ClearLevel();
-
-        currentLevel = leveldata;
-
-        GenerateGrid();
-        PlaceArrows();
     }
 
     void ClearLevel()
