@@ -98,4 +98,9 @@ public class LevelManager : MonoBehaviour
     {
         return currentLevelData;
     }
+
+    public void RestartLevel()
+    {
+        LoadLevel(currentLevel);
+    }
 }

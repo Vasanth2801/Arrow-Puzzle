@@ -1,90 +1,42 @@
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class LevelSelectorManager : MonoBehaviour
 {
-    [Header("Level Buttons")]
-    [SerializeField] private Button[] levelButtons;
+    [Header("References")]
+    [SerializeField] private LevelButton levelButtonPrefab;
+    [SerializeField] private Transform levelButtonParent;
 
-    [Header("Page Settings")]
-    [SerializeField] private int levelPerPage = 20;
-    private int currentPage = 0;
-    private int totalLevels;
+    [Header("Settings")]
+    [SerializeField] private int totalLevels = 100;
 
     private void Start()
     {
-        LevelManager levelManager = FindAnyObjectByType<LevelManager>();
-
-        if(levelManager != null )
-        {
-            totalLevels = levelManager.GetTotallevelCount();
-        }
-
-        RefreshPage();
+        GenerateLevelButtons();
     }
 
-    private void RefreshPage()
+    private void GenerateLevelButtons()
     {
-        int startLevel = currentPage * levelPerPage;
-
-        for(int i =0; i < levelButtons.Length; i++)
+        if(levelButtonPrefab == null)
         {
-            int levelNumber = startLevel + i + 1;
+            Debug.LogError("Level Button prefab is missing");
 
-            Button button = levelButtons[i];
+            return;
+        }
 
-            if(levelNumber > totalLevels)
-            {
-                button.gameObject.SetActive(false);
-                continue;
-            }
+        if(levelButtonParent == null)
+        {
+            Debug.LogError("Level Button Parent is missing");
 
-            button.gameObject.SetActive(true);
+            return;
+        }
 
-            button.interactable = levelNumber <= GetUnlockedLevel();
+        for(int i =0; i<= totalLevels; i++)
+        {
+            LevelButton button = Instantiate(levelButtonPrefab, levelButtonParent);
 
-            int selectedLevel = levelNumber;
-
-            button.onClick.RemoveAllListeners();
-
-            button.onClick.AddListener(() => LoadLevel(selectedLevel));
+            button.Setup(i);
         }
     }
 
-    private int GetUnlockedLevel()
-    {
-        return PlayerPrefs.GetInt("unlockedLevel", 1);
-    }
-
-    private void LoadLevel(int levelNumber)
-    {
-        PlayerPrefs.SetInt("selectedLevel", levelNumber);
-
-        PlayerPrefs.Save();
-
-        Debug.Log("Selected Level: " + levelNumber);
-    }
-
-    public void NextPage()
-    {
-        int maxPage = Mathf.CeilToInt((float)totalLevels/ levelPerPage) -1;
-
-        if(currentPage < maxPage)
-        {
-            currentPage++;
-
-            RefreshPage();
-        }
-    }
-
-    public void PreviousPage()
-    {
-        if(currentPage > 0)
-        {
-            currentPage--;
-
-            RefreshPage();
-        }
-    }
 }

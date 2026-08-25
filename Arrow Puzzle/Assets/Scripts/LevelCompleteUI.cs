@@ -41,7 +41,7 @@ public class LevelCompleteUI : MonoBehaviour
             return;
         }
 
-        levelText.text = "Level: " + levelManager.GetCurrentLevelNumber();
+        levelText.text = "Level: " + levelManager.GetCurrentLevel();
     }
 
     public void RestartLevel()
