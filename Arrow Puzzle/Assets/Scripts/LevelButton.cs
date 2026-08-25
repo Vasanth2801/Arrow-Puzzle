@@ -19,6 +19,22 @@ public class LevelButton : MonoBehaviour
         button.onClick.RemoveAllListeners();
 
         button.onClick.AddListener(OpenLevel);
+
+        UpdateButtonState();
+    }
+
+    private void UpdateButtonState()
+    {
+        if(LevelProgress.Instance == null)
+        {
+            Debug.LogError("Level Progress Not Found");
+
+            return;
+        }
+
+        bool unlocked = LevelProgress.Instance.IsLevelUnlocked(levelNumber);
+
+        button.interactable = unlocked;
     }
 
     private void OpenLevel()
