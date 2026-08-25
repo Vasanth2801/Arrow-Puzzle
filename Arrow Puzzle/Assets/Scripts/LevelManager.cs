@@ -7,7 +7,7 @@ public class LevelManager : MonoBehaviour
 
     [Header("Level Settings")]
     [SerializeField] private string levelFolder = "Levels/Generatoed";
-    [SerializeField] private int currentLevel = 0;
+    [SerializeField] private int currentLevel = 1;
 
     [Header("References")]
     [SerializeField] private GridManager gridManager;
@@ -26,7 +26,10 @@ public class LevelManager : MonoBehaviour
 
     private void Start()
     {
-        LoadLevel(currentLevel);
+        currentLevel = 1;
+
+
+        LoadLevel(1);
     }
 
     public void LoadLevel(int levelNumber)

@@ -1361,9 +1361,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9727c211c13df304885b217d9411e071, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelManager
-  levelFolder: Levels/Generatoed
-  currentLevel: 0
-  gridManager: {fileID: 0}
+  levelFolder: Assets/Resources/Levels/Generated
+  currentLevel: 1
+  gridManager: {fileID: 1259442365}
 --- !u!4 &1645320881
 Transform:
   m_ObjectHideFlags: 0
