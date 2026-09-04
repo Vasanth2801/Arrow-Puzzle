@@ -18,19 +18,17 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        BoardManager.Instance.onHeartsChanged += UpdateHearts;
-        BoardManager.Instance.onLevelChanged += UpdateLevel;
-        BoardManager.Instance.onLevelComplete += ShowWinPanel;
-        BoardManager.Instance.onGameOver += ShowLosePanel;
+        BoardManager.Instance.OnHeartsChanged += UpdateHearts;
+        BoardManager.Instance.OnLevelChanged += UpdateLevel;
+        BoardManager.Instance.OnLevelComplete += ShowWinPanel;
+        BoardManager.Instance.OnGameOver += ShowLosePanel;
 
         hintButton.onClick.AddListener(() => BoardManager.Instance.ShowHint());
-
         nextLevelButton.onClick.AddListener(() =>
         {
             HideAllPanels();
             BoardManager.Instance.NextLevel();
         });
-
         retryButton.onClick.AddListener(() =>
         {
             HideAllPanels();
