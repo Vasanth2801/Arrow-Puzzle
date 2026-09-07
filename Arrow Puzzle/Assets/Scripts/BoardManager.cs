@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class BoardManager : MonoBehaviour
 {
@@ -254,16 +255,35 @@ public class BoardManager : MonoBehaviour
         {
             Vector2Int prev = path.cells[path.cells.Count - 2];
             Vector2Int head = path.Head;
+
             return new Vector2(head.x - prev.x, head.y - prev.y);
         }
 
         Vector2Int c = path.Head;
-        float distLeft = c.x, distRight = width - 1 - c.x, distDown = c.y, distUp = height - 1 - c.y;
+
+        float distLeft = c.x;
+        float distRight = width - 1 - c.x;
+        float distDown = c.y;
+        float distUp = height - 1 - c.y;
+
         float min = Mathf.Min(Mathf.Min(distLeft, distRight), Mathf.Min(distDown, distUp));
-        if (min == distLeft) return Vector2.left;
-        if (min == distRight) return Vector2.right;
-        if (min == distDown) return Vector2.down;
+
+        if (min == distLeft)
+        {
+            return Vector2.left;
+
+        }
+        else if (min == distRight)
+        {
+            return Vector2.right;
+        }
+        else if (min == distDown)
+        {
+            return Vector2.down;
+        }
+            
         return Vector2.up;
+        
     }
 
     private void FitCameraToGrid()
@@ -305,6 +325,9 @@ public class BoardManager : MonoBehaviour
         if(blockedPathId != -1)
         {
             Debug.Log($"Blocked Path {cell.pathId} at {cell.coord} by Path {blockedPathId}");
+
+            StartCoroutine(FlashWrong(cell));
+
             StartCoroutine(ShowBlockedFeedback(cell.pathId, blockedPathId));
             return;
         }
@@ -442,7 +465,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    /*
+    
     private bool CanPathExit(int pathId)
     {
         if (pathId < 0 || pathId >= paths.Count)
@@ -490,7 +513,7 @@ public class BoardManager : MonoBehaviour
         }
         return true;
     }
-    */
+   
 
     private IEnumerator SlideOutAndClear(int pathId)
     {
@@ -557,9 +580,13 @@ public class BoardManager : MonoBehaviour
         for (int i = 0; i < paths.Count; i++)
         {
             if (paths[i].cleared) continue;
-            GameObject go = headGameObjects[i];
-            if (go != null) StartCoroutine(PulseHint(go));
-            break;
+
+            if (CanPathExit(i))
+            {
+                GameObject go = headGameObjects[i];
+                if (go != null) StartCoroutine(PulseHint(go));
+                break;
+            }
         }
     }
 
