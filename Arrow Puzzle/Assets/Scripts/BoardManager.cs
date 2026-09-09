@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class BoardManager : MonoBehaviour
 {
@@ -70,9 +69,15 @@ public class BoardManager : MonoBehaviour
 
     private void ClearBoardObjects()
     {
-        if (pathContainers == null) return;
+        if (pathContainers == null)
+        { 
+            return; 
+        }
+
         foreach (var go in pathContainers)
+        {
             if (go != null) Destroy(go);
+        }
     }
 
     private void BuildBoard()
@@ -82,103 +87,71 @@ public class BoardManager : MonoBehaviour
         pathContainers = new List<GameObject>();
         headGameObjects = new List<GameObject>();
 
-        Color[] pathColors = AssignDistinctColors(paths, cellPathId);
-
         for (int i = 0; i < paths.Count; i++)
         {
             GameObject container = new GameObject($"Path_{i}");
             container.transform.SetParent(transform, false);
             pathContainers.Add(container);
 
-            Color pathColor = pathColors[i];
-            Vector2Int head = paths[i].Head;
+            PathData path = paths[i];
             Vector2 dir = ComputeHeadDirection(paths[i]);
             pathDirections.Add(dir);
 
-            GameObject headGO = null;
+            Vector2Int head = path.Head;
 
-            foreach (var c in paths[i].cells)
+            GameObject headGO = Instantiate(cellPrefab, container.transform, false);
+
+            headGO.name = $"Head_(head.x)_(head.y)_path{i}";
+
+            headGO.transform.localPosition = new Vector3(head.x * cellSize, head.y * cellSize, 0f);
+
+            headGO.transform.localScale = Vector3.one * cellSize;
+
+            Transform visual = headGO.transform.Find("Visual");
+            
+            if(visual != null)
             {
-                GameObject go = Instantiate(cellPrefab, container.transform, false);
-                go.name = $"Cell_{c.x}_{c.y}_Path{i}";
-                go.transform.localPosition = new Vector3(c.x * cellSize, c.y * cellSize, 0f);
+                SpriteRenderer cellSprite = visual.GetComponent<SpriteRenderer>();
 
-                // Root stays at FULL tile size — this is what the collider
-                // scales with, so the entire tile (not just the visible
-                // square) registers taps. No dead zones between cells.
-                go.transform.localScale = Vector3.one * cellSize;
-
-                // Only the child "Visual" shrinks, purely for the grid-line
-                // look. Its local scale is relative to the root's scale
-                // (cellSize), so this math keeps the ON-SCREEN size at
-                // exactly (cellSize - cellGap) regardless of cellSize.
-                Transform visual = go.transform.Find("Visual");
-                visual.localScale = Vector3.one * ((cellSize - cellGap) / cellSize);
-
-                bool isHead = c == head;
-
-                SpriteRenderer sr = visual.GetComponent<SpriteRenderer>();
-                sr.color = pathColor;
-                sr.sortingOrder = 0;
-
-                GridCell cell = go.GetComponent<GridCell>();
-                cell.pathId = i;
-                cell.coord = c;
-                cell.isHead = isHead;
-
-                if (isHead)
+                if(cellSprite != null)
                 {
-                    headGO = go;
-                    if (arrowPrefab != null)
-                    {
-                        GameObject arrow = Instantiate(arrowPrefab, visual, false);
-                        arrow.transform.localPosition = new Vector3(0f, 0f, -0.02f);
-                        arrow.transform.localScale = Vector3.one * 0.6f;
-                        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
-                        arrow.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
-
-                        SpriteRenderer arrowSr = arrow.GetComponent<SpriteRenderer>();
-                        if (arrowSr != null) arrowSr.sortingOrder = 2;
-                    }
+                    cellSprite.enabled = false;
                 }
             }
 
+            GridCell cell = headGO.GetComponent<GridCell>();
+
+            if(cell != null)
+            {
+                cell.pathId = i;
+                cell.coord = head;
+                cell.isHead = true;
+            }
+
+
+            if (arrowPrefab != null && visual != null)
+                {
+                    GameObject arrow = Instantiate(arrowPrefab, visual, false);
+
+                    arrow.transform.localPosition = Vector3.zero;
+
+                    arrow.transform.localScale = Vector3.one * 0.75f;
+
+                    float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
+
+                    arrow.transform.localRotation = Quaternion.Euler(0,0,angle);
+
+                    SpriteRenderer arrowSr = arrow.GetComponent<SpriteRenderer>();
+
+                    if (arrowSr != null)
+                    {
+                        arrowSr.sortingOrder = 2;
+                    }
+                }
             headGameObjects.Add(headGO);
-
-            if (paths[i].cells.Count > 1)
-                BuildPathLine(container.transform, paths[i], Color.Lerp(pathColor, Color.black, 0.3f));
         }
 
-        // DIAGNOSTIC LOG — confirms every single path actually got a head
-        // GameObject assigned. If this number doesn't match "paths.Count",
-        // some paths never got a head at all, which would explain some
-        // arrows not working. Delete this line once everything checks out.
         Debug.Log($"[BUILD] {paths.Count} paths created, {headGameObjects.FindAll(h => h != null).Count} have a valid head object");
-    }
-
-    private void BuildPathLine(Transform parent, PathData path, Color lineColor)
-    {
-        GameObject lineObj = new GameObject("PathLine");
-        lineObj.transform.SetParent(parent, false);
-
-        LineRenderer lr = lineObj.AddComponent<LineRenderer>();
-        lr.useWorldSpace = false;
-        lr.positionCount = path.cells.Count;
-        for (int i = 0; i < path.cells.Count; i++)
-        {
-            Vector2Int c = path.cells[i];
-            lr.SetPosition(i, new Vector3(c.x * cellSize, c.y * cellSize, -0.01f));
-        }
-
-        float w = (cellSize - cellGap) * 0.18f;
-        lr.startWidth = w;
-        lr.endWidth = w;
-        lr.numCapVertices = 4;
-        lr.numCornerVertices = 4;
-        lr.sortingOrder = 1;
-        lr.material = new Material(Shader.Find("Sprites/Default"));
-        lr.startColor = lineColor;
-        lr.endColor = lineColor;
     }
 
     private Color[] AssignDistinctColors(List<PathData> paths, int[,] cellPathId)
@@ -203,7 +176,10 @@ public class BoardManager : MonoBehaviour
         }
 
         int[] order = new int[n];
-        for (int i = 0; i < n; i++) order[i] = i;
+        for (int i = 0; i < n; i++)
+        {
+            order[i] = i;
+        }
         for (int i = n - 1; i > 0; i--)
         {
             int j = UnityEngine.Random.Range(0, i + 1);
@@ -245,7 +221,9 @@ public class BoardManager : MonoBehaviour
 
         Color[] colors = new Color[n];
         for (int i = 0; i < n; i++)
+        {
             colors[i] = Color.HSVToRGB(hues[i], 0.62f, 0.92f);
+        }
         return colors;
     }
 
@@ -312,7 +290,10 @@ public class BoardManager : MonoBehaviour
         if (inputLocked) return;
 
         PathData path = paths[cell.pathId];
-        if (path.cleared) return;
+        if (path.cleared)
+        {
+            return;
+        }
 
         if(!cell.isHead)
         {

@@ -35,16 +35,9 @@ public static class LevelGenerator
         int area = width * height;
 
         // Keep path count reasonable for the board.
-        int targetPathCount = Mathf.Clamp(
-            Mathf.RoundToInt(area / 4f),
-            4,
-            12
-        );
+        int targetPathCount = Mathf.Clamp(Mathf.RoundToInt(area / 4f),4,12);
 
-        targetPathCount = Mathf.Min(
-            targetPathCount,
-            Mathf.Max(1, area / 3)
-        );
+        targetPathCount = Mathf.Min(targetPathCount,Mathf.Max(1, area / 3));
 
         // Try several times to get a good puzzle.
         const int attempts = 100;
@@ -60,70 +53,46 @@ public static class LevelGenerator
             );
 
             if (paths == null)
-                continue;
-
-            if (!HasFreeMove(
-                paths,
-                cellPathId,
-                width,
-                height))
             {
                 continue;
             }
 
-            if (!HasBlockingRelationship(
-                paths,
-                cellPathId,
-                width,
-                height))
+            if (!HasFreeMove(paths,cellPathId,width,height))
+            {
+                continue;
+            }
+
+            if (!HasBlockingRelationship(paths,cellPathId,width,height))
             {
                 continue;
             }
 
             if (!HasDirectionVariety(paths))
-                continue;
-
-            if (!IsSolvable(
-                paths,
-                cellPathId,
-                width,
-                height))
             {
                 continue;
             }
 
-            Debug.Log(
-                $"[GENERATOR] Valid puzzle generated: " +
-                $"{paths.Count} paths | Board {width}x{height}"
-            );
+            if (!IsSolvable(paths,cellPathId,width,height))
+            {
+                continue;
+            }
+
+            Debug.Log($"[GENERATOR] Valid puzzle generated: " + $"{paths.Count} paths | Board {width}x{height}");
 
             return paths;
         }
 
         // If random generation fails, use a guaranteed safe fallback.
-        Debug.LogWarning(
-            "[GENERATOR] Random generation failed. " +
-            "Using safe fallback."
-        );
+        Debug.LogWarning("[GENERATOR] Random generation failed. " + "Using safe fallback.");
 
-        return CreateFallback(
-            width,
-            height,
-            maxPathLength,
-            out cellPathId
-        );
+        return CreateFallback(width,height,maxPathLength,out cellPathId);
     }
 
     // ================================================================
     // MAIN GENERATOR
     // ================================================================
 
-    private static List<PathData> TryGenerate(
-        int width,
-        int height,
-        int maxPathLength,
-        int targetPathCount,
-        out int[,] cellPathId)
+    private static List<PathData> TryGenerate(int width,int height,int maxPathLength,int targetPathCount,out int[,] cellPathId)
     {
         cellPathId = CreateEmptyGrid(width, height);
 

@@ -1411,7 +1411,8 @@ MonoBehaviour:
   maxWidth: 8
   maxHeight: 10
   cellSize: 1
-  cellGap: 0.08
+  cellGap: 0
+  maxPathLength: 6
   cellPrefab: {fileID: 1485978554430525102, guid: 189c25fa265ea2841b3eb1f96b546adf, type: 3}
   arrowPrefab: {fileID: 5309691780771964337, guid: 0f888032c01d2ef48b828cb6a57baf61, type: 3}
   maxHearts: 3
