@@ -27,6 +27,11 @@ public class UIManager : MonoBehaviour
         nextLevelButton.onClick.AddListener(() =>
         {
             HideAllPanels();
+
+            int nextLevel = BoardManager.Instance.CurrentLevel + 1;
+
+            GameProgress.Instance.SaveLevel(nextLevel);
+
             BoardManager.Instance.NextLevel();
         });
         retryButton.onClick.AddListener(() =>
