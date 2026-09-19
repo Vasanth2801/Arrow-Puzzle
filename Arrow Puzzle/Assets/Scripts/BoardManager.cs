@@ -366,27 +366,27 @@ public class BoardManager : MonoBehaviour
         {
             int otherPathId = cellPathId[check.x,check.y];
 
-            if (otherPathId == -1)
+            if (otherPathId == -1 || otherPathId == pathId)
             {
                 check += gridDirection;
                 continue;
             }
 
-            if (otherPathId == pathId)
+            PathData otherPath = paths[otherPathId];
+
+            if (otherPath == null || otherPath.cleared)
             {
                 check += gridDirection;
                 continue;
             }
 
-            if (paths[otherPathId].cleared)
+            if (otherPath.Head == check)
             {
-                check += gridDirection;
-                continue;
+                Debug.Log("Block Found");
+                return otherPathId;
             }
 
-            Debug.Log($"[Block Found] Path{pathId}" + $"Head{head}" + $"Direction{gridDirection}" + $"blocked at cell {check}" + $"By path {otherPathId}" + $"Whose Head is {paths[otherPathId].Head}") ;
-
-            return otherPathId;
+            check += gridDirection;
         }
 
         return -1;
