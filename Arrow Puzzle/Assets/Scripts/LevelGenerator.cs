@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-
+  
 public class PathData
 {
     public List<Vector2Int> cells = new List<Vector2Int>();

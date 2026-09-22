@@ -7,6 +7,7 @@ public class UIManager : MonoBehaviour
     public Text heartsText;
     public Text levelText;
     public Button hintButton;
+    public Button resetProgress;
 
     [Header("Win Panel")]
     public GameObject winPanel;
@@ -39,6 +40,8 @@ public class UIManager : MonoBehaviour
             HideAllPanels();
             BoardManager.Instance.RestartLevel();
         });
+
+       
 
         HideAllPanels();
         UpdateHearts(BoardManager.Instance.MaxHearts);

@@ -8,12 +8,13 @@ public class BoardManager : MonoBehaviour
     public static BoardManager Instance;
 
     [Header("Grid Settings (grows slowly with level)")]
-    public int baseWidth = 5;
+    public int baseWidth = 6;
     public int baseHeight = 6;
-    public int maxWidth = 8;
-    public int maxHeight = 10;
+    public int maxWidth = 6;
+    public int maxHeight = 7;
     public float cellSize = 1f;
-    public float cellGap = 0.08f;
+    public float cellGap = 0f;
+    public float visualSpacing = 0.7f;
 
     [Header("Readability")]
     [Tooltip("Max cells a single path can occupy. Lower = shorter, easier to read paths.")]
@@ -25,7 +26,6 @@ public class BoardManager : MonoBehaviour
 
     [Header("Gameplay")]
     public int maxHearts = 3;
-
     public int CurrentLevel { get; private set; } = 1;
     public int MaxHearts => maxHearts;
 
@@ -103,12 +103,7 @@ public class BoardManager : MonoBehaviour
 
         UnityEngine.Random.InitState(CurrentLevel * 100003);
 
-        paths = LevelGenerator.Generate(
-            width,
-            height,
-            maxPathLength,
-            out cellPathId
-        );
+        paths = LevelGenerator.Generate(width,height,maxPathLength,out cellPathId);
 
         UnityEngine.Random.state = previousRandomState;
 
@@ -131,12 +126,42 @@ public class BoardManager : MonoBehaviour
             pathDirections.Add(dir);
 
             Vector2Int head = path.Head;
+            /*
+            GameObject pathVisual = new GameObject("PathVisual");
 
+            pathVisual.transform.SetParent(container.transform, false);
+
+            LineRenderer line = pathVisual.AddComponent<LineRenderer>();
+
+            line.positionCount = path.cells.Count;
+
+            line.useWorldSpace = false;
+
+            line.startWidth = 0.12f;
+
+            line.endWidth = 0.12f;
+
+            line.numCapVertices = 4;
+
+            line.numCornerVertices = 4;
+
+            line.material = new Material(Shader.Find("Sprites/Default"));
+
+            line.startColor = new Color(0.55f, 0.62f, 0.72f);
+            line.endColor = new Color(0.55f, 0.62f, 0.72f);
+
+            for(int p =0; p < path.cells.Count; p++)
+            {
+                Vector2Int cellPos = path.cells[p];
+
+                line.SetPosition(p, new Vector3(cellPos.x * cellSize, cellPos.y * cellSize,0f));
+            }
+            */
             GameObject headGO = Instantiate(cellPrefab, container.transform,false);
 
             headGO.name = $"Head_{head.x}_{head.y}_Path{i}";
 
-            headGO.transform.localPosition = new Vector3(head.x * cellSize, head.y * cellSize, 0f);
+            headGO.transform.localPosition = new Vector3(head.x * cellSize * visualSpacing, head.y * cellSize * visualSpacing, 0f);
 
             headGO.transform.localScale = Vector3.one * cellSize;
 
@@ -167,7 +192,7 @@ public class BoardManager : MonoBehaviour
 
                 arrow.transform.localPosition = Vector3.zero;
 
-                arrow.transform.localScale = Vector3.one * 0.75f;
+                arrow.transform.localScale = Vector3.one * 1.4f;
 
                 float angle = Mathf.Atan2(dir.y,dir.x) * Mathf.Rad2Deg - 90f;
 
@@ -288,11 +313,11 @@ public class BoardManager : MonoBehaviour
 
         cam.orthographic = true;
 
-        float gridWidth =  width * cellSize;
+        float gridWidth =  width * cellSize * visualSpacing;
 
-        float gridHeight =  height * cellSize;
+        float gridHeight =  height * cellSize * visualSpacing;
 
-        cam.transform.position =  new Vector3((gridWidth - cellSize) / 2f,(gridHeight - cellSize) / 2f,-10f);
+        cam.transform.position =  new Vector3((gridWidth - cellSize * visualSpacing) / 2f,(gridHeight - cellSize * visualSpacing) / 2f,-10f);
 
         float verticalSize = gridHeight / 2f + 0.5f;
 

@@ -5,9 +5,6 @@ using System.Collections.Generic;
 public class GameProgress : MonoBehaviour
 {
     private const string CURRENT_LEVEL_KEY = "CurrentLevel";
-    private const string CLEARED_PREFIX = "Level_";
-    private const string CLEARED_SUFFIX = "_Cleared";
-
     public static GameProgress Instance { get; private set; }
 
     private void Awake()
@@ -43,15 +40,6 @@ public class GameProgress : MonoBehaviour
     public bool HasSavedProgress()
     {
         return PlayerPrefs.HasKey(CURRENT_LEVEL_KEY);
-    }
-
-    public void ResetProgress()
-    {
-        PlayerPrefs.DeleteKey(CURRENT_LEVEL_KEY);
-
-        PlayerPrefs.Save();
-
-        Debug.Log("[Save] Progress Reset");
     }
 
     private string GetClearedKey(int levelNumber)
@@ -103,4 +91,16 @@ public class GameProgress : MonoBehaviour
 
         PlayerPrefs.Save();
     }    
+
+    public void ResetAllProgress()
+    {
+        PlayerPrefs.DeleteKey(CURRENT_LEVEL_KEY);
+
+        for (int level = 1; level <= 100; level++)
+        {
+            PlayerPrefs.DeleteKey(GetClearedKey(level));
+        }
+
+        PlayerPrefs.Save();
+    }
 }
