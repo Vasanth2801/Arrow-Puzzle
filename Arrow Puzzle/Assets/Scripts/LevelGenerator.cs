@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-  
+
 public class PathData
 {
     public List<Vector2Int> cells = new List<Vector2Int>();
@@ -19,7 +19,7 @@ public static class LevelGenerator
         Vector2Int.right
     };
 
-    public static List<PathData> Generate(int width,int height,int maxPathLength,out int[,] cellPathId)
+    public static List<PathData> Generate(int width, int height, int maxPathLength, out int[,] cellPathId)
     {
         width = Mathf.Max(1, width);
         height = Mathf.Max(1, height);
@@ -29,27 +29,27 @@ public static class LevelGenerator
 
         int area = width * height;
 
-        int targetPathCount = Mathf.Clamp(Mathf.RoundToInt(area / 4f),4,12);
+        int targetPathCount = Mathf.Clamp(Mathf.RoundToInt(area / 4f), 4, 12);
 
-        targetPathCount = Mathf.Min(targetPathCount,Mathf.Max(1, area / 3));
+        targetPathCount = Mathf.Min(targetPathCount, Mathf.Max(1, area / 3));
 
         const int attempts = 100;
 
         for (int attempt = 0; attempt < attempts; attempt++)
         {
-            List<PathData> paths = TryGenerate(width,height,maxPathLength,targetPathCount,out cellPathId);
+            List<PathData> paths = TryGenerate(width, height, maxPathLength, targetPathCount, out cellPathId);
 
             if (paths == null)
             {
                 continue;
             }
 
-            if (!HasFreeMove(paths,cellPathId,width,height))
+            if (!HasFreeMove(paths, cellPathId, width, height))
             {
                 continue;
             }
 
-            if (!HasBlockingRelationship(paths,cellPathId,width,height))
+            if (!HasBlockingRelationship(paths, cellPathId, width, height))
             {
                 continue;
             }
@@ -59,7 +59,7 @@ public static class LevelGenerator
                 continue;
             }
 
-            if (!IsSolvable(paths,cellPathId,width,height))
+            if (!IsSolvable(paths, cellPathId, width, height))
             {
                 continue;
             }
@@ -70,10 +70,10 @@ public static class LevelGenerator
         }
         Debug.LogWarning("[GENERATOR] Random generation failed. " + "Using safe fallback.");
 
-        return CreateFallback(width,height,maxPathLength,out cellPathId);
+        return CreateFallback(width, height, maxPathLength, out cellPathId);
     }
 
-    private static List<PathData> TryGenerate(int width,int height,int maxPathLength,int targetPathCount,out int[,] cellPathId)
+    private static List<PathData> TryGenerate(int width, int height, int maxPathLength, int targetPathCount, out int[,] cellPathId)
     {
         cellPathId = CreateEmptyGrid(width, height);
 
@@ -81,15 +81,22 @@ public static class LevelGenerator
 
         List<PathData> paths = new List<PathData>();
 
-        int pathAttempts = targetPathCount * 30;
+        int pathAttempts = Mathf.Max(targetPathCount * 30, width * height * 2);
 
-        for (int attempt = 0; attempt < pathAttempts && paths.Count < targetPathCount;attempt++)
+        for (int attempt = 0; attempt < pathAttempts; attempt++)
         {
-            Vector2Int head = GetRandomFreeCell(occupied,width,height);
+            if (paths.Count >= targetPathCount)
+            {
+                break;
+            }
+
+            Vector2Int head = GetRandomHead(width, height);
 
             if (!InBounds(head, width, height))
             {
-                continue;
+                // No free cells left anywhere on the board — we're done,
+                // no point spending more attempts.
+                break;
             }
 
             if (occupied[head.x, head.y])
@@ -97,7 +104,7 @@ public static class LevelGenerator
                 continue;
             }
 
-            List<Vector2Int> validDirections = GetValidHeadDirections(head,width,height);
+            List<Vector2Int> validDirections = GetValidHeadDirections(head, width, height);
 
             if (validDirections.Count == 0)
             {
@@ -108,7 +115,7 @@ public static class LevelGenerator
 
             Vector2Int direction = validDirections[0];
 
-            List<Vector2Int> cells = BuildPathBackwards(head,direction,occupied,width,height,maxPathLength);
+            List<Vector2Int> cells = BuildPathBackwards(head, direction, occupied, width, height, maxPathLength);
 
             if (cells == null)
             {
@@ -182,34 +189,24 @@ public static class LevelGenerator
         return paths;
     }
 
-    private static Vector2Int GetRandomFreeCell(bool[,] occupied,int width,int height)
+    private static Vector2Int GetRandomHead(int width, int height)
     {
-        for (int i = 0; i < 50; i++)
+        // Prefer interior cells so other paths can block the head.
+        if (width > 2 && height > 2 && Random.value < 0.80f)
         {
-            int x = Random.Range(0, width);
-            int y = Random.Range(0, height);
-
-            if (!occupied[x, y])
-            {
-                return new Vector2Int(x, y);
-            }
+            return new Vector2Int(
+                Random.Range(1, width - 1),
+                Random.Range(1, height - 1)
+            );
         }
 
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                if (!occupied[x, y])
-                {
-                    return new Vector2Int(x, y);
-                }
-            }
-        }
-
-        return new Vector2Int(-1, -1);
+        return new Vector2Int(
+            Random.Range(0, width),
+            Random.Range(0, height)
+        );
     }
 
-    private static List<Vector2Int> GetValidHeadDirections(Vector2Int head,int width,int height)
+    private static List<Vector2Int> GetValidHeadDirections(Vector2Int head, int width, int height)
     {
         List<Vector2Int> result = new List<Vector2Int>();
 
@@ -217,10 +214,10 @@ public static class LevelGenerator
         {
             Vector2Int direction = Directions[i];
 
-            
+
             Vector2Int previous = head - direction;
 
-            if (InBounds(previous,width,height))
+            if (InBounds(previous, width, height))
             {
                 result.Add(direction);
             }
@@ -229,9 +226,9 @@ public static class LevelGenerator
         return result;
     }
 
-    private static List<Vector2Int> BuildPathBackwards(Vector2Int head,Vector2Int headDirection,bool[,] occupied,int width,int height,int maxPathLength)
+    private static List<Vector2Int> BuildPathBackwards(Vector2Int head, Vector2Int headDirection, bool[,] occupied, int width, int height, int maxPathLength)
     {
-        if (!InBounds(head,width,height))
+        if (!InBounds(head, width, height))
         {
             return null;
         }
@@ -242,7 +239,7 @@ public static class LevelGenerator
 
         Vector2Int current = head - headDirection;
 
-        if (!InBounds(current,width,height))
+        if (!InBounds(current, width, height))
         {
             return null;
         }
@@ -258,11 +255,11 @@ public static class LevelGenerator
         {
             List<Vector2Int> candidates = new List<Vector2Int>();
 
-            for (int i = 0;i < Directions.Length;i++)
+            for (int i = 0; i < Directions.Length; i++)
             {
                 Vector2Int next = current + Directions[i];
 
-                if (!InBounds(next,width,height))
+                if (!InBounds(next, width, height))
                 {
                     continue;
                 }
@@ -295,17 +292,17 @@ public static class LevelGenerator
             }
             else
             {
-                chosen = candidates[Random.Range(0,candidates.Count)];
+                chosen = candidates[Random.Range(0, candidates.Count)];
             }
 
             Vector2Int newPosition = current + chosen;
 
-            if (!InBounds(newPosition,width,height))
+            if (!InBounds(newPosition, width, height))
             {
                 break;
             }
 
-            if (occupied[newPosition.x,newPosition.y])
+            if (occupied[newPosition.x, newPosition.y])
             {
                 break;
             }
@@ -322,11 +319,11 @@ public static class LevelGenerator
         return path;
     }
 
-    private static bool HasFreeMove(List<PathData> paths,int[,] cellPathId,int width,int height)
+    private static bool HasFreeMove(List<PathData> paths, int[,] cellPathId, int width, int height)
     {
         for (int i = 0; i < paths.Count; i++)
         {
-            if (CanExit(i,paths,cellPathId,width,height,null))
+            if (CanExit(i, paths, cellPathId, width, height, null))
             {
                 return true;
             }
@@ -334,11 +331,11 @@ public static class LevelGenerator
         return false;
     }
 
-    private static bool HasBlockingRelationship(List<PathData> paths,int[,] cellPathId,int width,int height)
+    private static bool HasBlockingRelationship(List<PathData> paths, int[,] cellPathId, int width, int height)
     {
         for (int i = 0; i < paths.Count; i++)
         {
-            if (!CanExit(i,paths,cellPathId,width,height,null))
+            if (!CanExit(i, paths, cellPathId, width, height, null))
             {
                 return true;
             }
@@ -380,8 +377,8 @@ public static class LevelGenerator
             }
 
             if (direction == Vector2Int.right)
-            { 
-                right = true; 
+            {
+                right = true;
             }
         }
 
@@ -407,56 +404,87 @@ public static class LevelGenerator
         return count >= 2;
     }
 
-    private static bool CanExit(int pathId,List<PathData> paths,int[,] cellPathId,int width,int height,bool[] cleared)
+    // Mirrors BoardManager.ComputeHeadDirection's single-cell fallback
+    // exactly (same tie-break order: left, right, down, up) so the solver
+    // here and the actual runtime behavior never disagree about which way
+    // a single-cell path will try to exit.
+    private static Vector2Int GetSingleCellExitDirection(Vector2Int cell, int width, int height)
+    {
+        float distLeft = cell.x;
+        float distRight = width - 1 - cell.x;
+        float distDown = cell.y;
+        float distUp = height - 1 - cell.y;
+
+        float min = Mathf.Min(Mathf.Min(distLeft, distRight), Mathf.Min(distDown, distUp));
+
+        if (min == distLeft) return Vector2Int.left;
+        if (min == distRight) return Vector2Int.right;
+        if (min == distDown) return Vector2Int.down;
+        return Vector2Int.up;
+    }
+
+    private static bool CanExit(
+        int pathId,
+        List<PathData> paths,
+        int[,] cellPathId,
+        int width,
+        int height,
+        bool[] cleared)
     {
         PathData path = paths[pathId];
 
+        Vector2Int head = path.Head;
+        Vector2Int direction;
+
         if (path.cells.Count < 2)
         {
-            return true;
+            direction = GetSingleCellExitDirection(
+                head, width, height
+            );
         }
+        else
+        {
+            Vector2Int previous =
+                path.cells[path.cells.Count - 2];
 
-        Vector2Int head = path.Head;
-
-        Vector2Int previous = path.cells[path.cells.Count - 2];
-
-        Vector2Int direction = head - previous;
+            direction = head - previous;
+        }
 
         Vector2Int check = head + direction;
 
-        while (InBounds(check,width,height))
+        while (InBounds(check, width, height))
         {
-            int otherPathId = cellPathId[check.x,check.y];
+            int otherPathId =
+                cellPathId[check.x, check.y];
 
-            
-            if (otherPathId == -1)
+            if (otherPathId == -1 ||
+                otherPathId == pathId)
             {
                 check += direction;
                 continue;
             }
 
-           
-            if (otherPathId == pathId)
+            if (cleared != null &&
+                cleared[otherPathId])
             {
                 check += direction;
                 continue;
             }
 
-            
-            if (cleared != null && cleared[otherPathId])
+            // Only another path's HEAD blocks.
+            if (paths[otherPathId].Head == check)
             {
-                check += direction;
-                continue;
+                return false;
             }
 
-            return false;
+            check += direction;
         }
 
         return true;
     }
 
 
-    private static bool IsSolvable(List<PathData> paths,int[,] cellPathId,int width,int height)
+    private static bool IsSolvable(List<PathData> paths, int[,] cellPathId, int width, int height)
     {
         bool[] cleared = new bool[paths.Count];
 
@@ -466,14 +494,14 @@ public static class LevelGenerator
         {
             bool foundMove = false;
 
-            for (int i = 0;i < paths.Count;i++)
+            for (int i = 0; i < paths.Count; i++)
             {
                 if (cleared[i])
                 {
                     continue;
                 }
 
-                if (CanExit(i,paths,cellPathId,width,height,cleared))
+                if (CanExit(i, paths, cellPathId, width, height, cleared))
                 {
                     cleared[i] = true;
                     remaining--;
@@ -491,26 +519,53 @@ public static class LevelGenerator
         return true;
     }
 
-    private static List<PathData> CreateFallback(int width,int height,int maxPathLength,out int[,] cellPathId)
+    private static Vector2Int GetRandomFreeCell(bool[,] occupied, int width, int height)
     {
-        cellPathId = CreateEmptyGrid(width,height);
+        for (int i = 0; i < 50; i++)
+        {
+            int x = Random.Range(0, width);
+            int y = Random.Range(0, height);
+
+            if (!occupied[x, y])
+            {
+                return new Vector2Int(x, y);
+            }
+        }
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (!occupied[x, y])
+                {
+                    return new Vector2Int(x, y);
+                }
+            }
+        }
+
+        return new Vector2Int(-1, -1);
+    }
+
+    private static List<PathData> CreateFallback(int width, int height, int maxPathLength, out int[,] cellPathId)
+    {
+        cellPathId = CreateEmptyGrid(width, height);
 
         bool[,] occupied = new bool[width, height];
 
         List<PathData> paths = new List<PathData>();
 
-        int target = Mathf.Clamp(Mathf.RoundToInt(width * height / 5f),4,10);
+        int target = Mathf.Clamp(Mathf.RoundToInt(width * height / 5f), 4, 10);
 
-        for (int attempt = 0;attempt < 1000 && paths.Count < target; attempt++)
+        for (int attempt = 0; attempt < 1000 && paths.Count < target; attempt++)
         {
-            Vector2Int head = GetRandomFreeCell(occupied,width,height);
+            Vector2Int head = GetRandomFreeCell(occupied, width, height);
 
-            if (!InBounds(head,width,height))
+            if (!InBounds(head, width, height))
             {
                 break;
             }
 
-            List<Vector2Int> directions = GetValidHeadDirections(head,width,height);
+            List<Vector2Int> directions = GetValidHeadDirections(head, width, height);
 
             if (directions.Count == 0)
             {
@@ -521,7 +576,7 @@ public static class LevelGenerator
 
             Vector2Int direction = directions[0];
 
-            List<Vector2Int> cells = BuildPathBackwards(head,direction,occupied,width,height,Mathf.Min(maxPathLength,3));
+            List<Vector2Int> cells = BuildPathBackwards(head, direction, occupied, width, height, Mathf.Min(maxPathLength, 3));
             if (cells == null || cells.Count < 2)
             {
                 continue;
@@ -529,17 +584,17 @@ public static class LevelGenerator
 
             bool valid = true;
 
-            for (int i = 0;i < cells.Count;i++)
+            for (int i = 0; i < cells.Count; i++)
             {
                 Vector2Int cell = cells[i];
 
-                if (!InBounds(cell,width,height))
+                if (!InBounds(cell, width, height))
                 {
                     valid = false;
                     break;
                 }
 
-                if (occupied[cell.x,cell.y])
+                if (occupied[cell.x, cell.y])
                 {
                     valid = false;
                     break;
@@ -555,15 +610,15 @@ public static class LevelGenerator
 
             PathData path = new PathData();
 
-            for (int i = 0;i < cells.Count;i++)
+            for (int i = 0; i < cells.Count; i++)
             {
                 Vector2Int cell = cells[i];
 
                 path.cells.Add(cell);
 
-                occupied[cell.x,cell.y] = true;
+                occupied[cell.x, cell.y] = true;
 
-                cellPathId[cell.x,cell.y] = paths.Count;
+                cellPathId[cell.x, cell.y] = paths.Count;
             }
             paths.Add(path);
         }
@@ -571,13 +626,13 @@ public static class LevelGenerator
         return paths;
     }
 
-    private static int[,] CreateEmptyGrid(int width,int height)
+    private static int[,] CreateEmptyGrid(int width, int height)
     {
         int[,] grid = new int[width, height];
 
-        for (int x = 0; x < width;x++)
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0;y < height;y++)
+            for (int y = 0; y < height; y++)
             {
                 grid[x, y] = -1;
             }
@@ -586,16 +641,16 @@ public static class LevelGenerator
         return grid;
     }
 
-    private static bool InBounds(Vector2Int position,int width,int height)
+    private static bool InBounds(Vector2Int position, int width, int height)
     {
         return position.x >= 0 && position.x < width && position.y >= 0 && position.y < height;
     }
 
     private static void Shuffle(List<Vector2Int> list)
     {
-        for (int i = list.Count - 1;i > 0;i--)
+        for (int i = list.Count - 1; i > 0; i--)
         {
-            int j = Random.Range(0,i + 1);
+            int j = Random.Range(0, i + 1);
 
             Vector2Int temp = list[i];
 

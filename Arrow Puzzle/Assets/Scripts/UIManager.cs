@@ -24,24 +24,29 @@ public class UIManager : MonoBehaviour
         BoardManager.Instance.OnLevelComplete += ShowWinPanel;
         BoardManager.Instance.OnGameOver += ShowLosePanel;
 
-        hintButton.onClick.AddListener(() => BoardManager.Instance.ShowHint());
+        hintButton.onClick.AddListener(() =>
+        {
+            AudioManager.Instance?.PlayButtonClick();
+            BoardManager.Instance.ShowHint();
+        });
+
         nextLevelButton.onClick.AddListener(() =>
         {
+            AudioManager.Instance?.PlayButtonClick();
             HideAllPanels();
 
             int nextLevel = BoardManager.Instance.CurrentLevel + 1;
-
             GameProgress.Instance.SaveLevel(nextLevel);
 
             BoardManager.Instance.NextLevel();
         });
+
         retryButton.onClick.AddListener(() =>
         {
+            AudioManager.Instance?.PlayButtonClick();
             HideAllPanels();
             BoardManager.Instance.RestartLevel();
         });
-
-       
 
         HideAllPanels();
         UpdateHearts(BoardManager.Instance.MaxHearts);

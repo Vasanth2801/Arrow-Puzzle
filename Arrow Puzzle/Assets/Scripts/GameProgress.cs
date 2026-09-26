@@ -1,10 +1,9 @@
-using System.Linq;
 using UnityEngine;
-using System.Collections.Generic;
 
 public class GameProgress : MonoBehaviour
 {
     private const string CURRENT_LEVEL_KEY = "CurrentLevel";
+
     public static GameProgress Instance { get; private set; }
 
     private void Awake()
@@ -16,7 +15,6 @@ public class GameProgress : MonoBehaviour
         }
 
         Instance = this;
-
         DontDestroyOnLoad(gameObject);
     }
 
@@ -24,22 +22,37 @@ public class GameProgress : MonoBehaviour
     {
         PlayerPrefs.SetInt(CURRENT_LEVEL_KEY, levelNumber);
         PlayerPrefs.Save();
-
-        Debug.Log($"[SAVE] Level Saved: {levelNumber}");
+        Debug.Log($"[SAVE] Level saved: {levelNumber}");
     }
 
     public int GetSavedLevel()
     {
         int savedLevel = PlayerPrefs.GetInt(CURRENT_LEVEL_KEY, 1);
-
-        Debug.Log($"[Load] Saved Level: {savedLevel}");
-
+        Debug.Log($"[LOAD] Saved level: {savedLevel}");
         return savedLevel;
     }
 
     public bool HasSavedProgress()
     {
         return PlayerPrefs.HasKey(CURRENT_LEVEL_KEY);
+    }
+
+    public void ResetAllProgress()
+    {
+        PlayerPrefs.DeleteKey(CURRENT_LEVEL_KEY);
+
+        for (int level = 1; level <= 100; level++)
+        {
+            PlayerPrefs.DeleteKey(GetClearedKey(level));
+        }
+
+        PlayerPrefs.Save();
+        Debug.Log("[SAVE] All progress reset.");
+    }
+
+    public void ResetProgress()
+    {
+        ResetAllProgress();
     }
 
     private string GetClearedKey(int levelNumber)
@@ -76,31 +89,18 @@ public class GameProgress : MonoBehaviour
         }
 
         PlayerPrefs.SetString(GetClearedKey(levelNumber), current);
-
-        Debug.Log($"[Save] Level {levelNumber} cleared path: {pathId}");
+        PlayerPrefs.Save();
+        Debug.Log($"[SAVE] Level {levelNumber} cleared path: {pathId}");
     }
 
     public string GetClearedPaths(int levelNumber)
     {
-        return PlayerPrefs.GetString(GetClearedKey(levelNumber));
+        return PlayerPrefs.GetString(GetClearedKey(levelNumber), "");
     }
 
     public void ClearClearedPaths(int levelNumber)
     {
         PlayerPrefs.DeleteKey(GetClearedKey(levelNumber));
-
-        PlayerPrefs.Save();
-    }    
-
-    public void ResetAllProgress()
-    {
-        PlayerPrefs.DeleteKey(CURRENT_LEVEL_KEY);
-
-        for (int level = 1; level <= 100; level++)
-        {
-            PlayerPrefs.DeleteKey(GetClearedKey(level));
-        }
-
         PlayerPrefs.Save();
     }
 }
