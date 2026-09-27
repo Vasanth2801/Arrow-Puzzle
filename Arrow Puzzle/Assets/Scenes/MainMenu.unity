@@ -202,7 +202,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1326938398}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
         m_MethodName: OpenResetConfirm
         m_Mode: 1
@@ -335,7 +335,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1326938398}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
         m_MethodName: Play
         m_Mode: 1
@@ -820,7 +820,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1326938398}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
         m_MethodName: QuitGame
         m_Mode: 1
@@ -1139,7 +1139,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1326938398}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
         m_MethodName: ConfirmReset
         m_Mode: 1
@@ -1272,7 +1272,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1326938398}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
         m_MethodName: CancelResetConfirm
         m_Mode: 1
@@ -1363,11 +1363,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1326938396}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 765c1b0b1a348e74fbc21a0231ed3064, type: 3}
+  m_Script: {fileID: 11500000, guid: 21658d99c72c8554aa0d62311a68228a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuManager
+  playButton: {fileID: 59296191}
+  resetButton: {fileID: 36242249}
+  quitButton: {fileID: 394158326}
   resetConfirmPanel: {fileID: 95723984}
-  resetProgress: {fileID: 1225991566}
+  confirmResetButton: {fileID: 1225991566}
+  cancelResetButton: {fileID: 1243192430}
 --- !u!1 &1543724160
 GameObject:
   m_ObjectHideFlags: 0
@@ -1925,7 +1929,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1912255809}
-  - component: {fileID: 1912255808}
+  - component: {fileID: 1912255810}
   m_Layer: 0
   m_Name: GameProgress
   m_TagString: Untagged
@@ -1933,18 +1937,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1912255808
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1912255807}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9da27fd30a93596468cd3030c0dbba8c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameProgress
 --- !u!4 &1912255809
 Transform:
   m_ObjectHideFlags: 0
@@ -1960,6 +1952,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1912255810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1912255807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f5380ad0f42ca94db3b6165b3511a35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameProgress
 --- !u!1 &1995628496
 GameObject:
   m_ObjectHideFlags: 0
@@ -2106,7 +2110,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2079476093}
-  - component: {fileID: 2079476095}
+  - component: {fileID: 2079476097}
   - component: {fileID: 2079476094}
   - component: {fileID: 2079476096}
   m_Layer: 0
@@ -2144,7 +2148,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 3c200e57474d0c44cad5edde67840367, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.35
+  m_Volume: 0.249
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -2228,25 +2232,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &2079476095
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2079476092}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6bc702bbffc399f44a00653bc1ad0328, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
-  musicSource: {fileID: 2079476094}
-  sfxSource: {fileID: 2079476096}
-  buttonClip: {fileID: 8300000, guid: f809f90a34b90164286447f2e91e16fd, type: 3}
-  arrowClear: {fileID: 8300000, guid: 6e0107745b7be0940b9f7ea7d50b2599, type: 3}
-  wrongMove: {fileID: 8300000, guid: c27f7ade71c96784b8a4e96bc993b10c, type: 3}
-  levelComplete: {fileID: 8300000, guid: 93b12d2e3c3f1a046ab78f6d21dbf395, type: 3}
-  gameOver: {fileID: 8300000, guid: 7b7de0d21192bc04bbd224335fbf69f3, type: 3}
 --- !u!82 &2079476096
 AudioSource:
   m_ObjectHideFlags: 0
@@ -2344,6 +2329,25 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2079476097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2079476092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd7eeaadaaae7da459fa89a3993e4dc7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  musicSource: {fileID: 2079476094}
+  sfxSource: {fileID: 2079476096}
+  buttonClip: {fileID: 8300000, guid: f809f90a34b90164286447f2e91e16fd, type: 3}
+  arrowClearClip: {fileID: 8300000, guid: 6e0107745b7be0940b9f7ea7d50b2599, type: 3}
+  wrongMoveClip: {fileID: 8300000, guid: c27f7ade71c96784b8a4e96bc993b10c, type: 3}
+  levelCompleteClip: {fileID: 8300000, guid: 93b12d2e3c3f1a046ab78f6d21dbf395, type: 3}
+  gameOverClip: {fileID: 8300000, guid: 7b7de0d21192bc04bbd224335fbf69f3, type: 3}
 --- !u!1 &2082232021
 GameObject:
   m_ObjectHideFlags: 0
