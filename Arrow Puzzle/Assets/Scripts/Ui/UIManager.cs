@@ -1,82 +1,117 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
-public class UIManager : MonoBehaviour
-{
-    [Header("HUD")]
-    [SerializeField] private Text heartsText;
-    [SerializeField] private Text levelText;
-    [SerializeField] private Button hintButton;
-    [SerializeField] private Button backButton;
-
-    [Header("Panels")]
-    [SerializeField] private GameObject winPanel;
-    [SerializeField] private GameObject losePanel;
-
-    [Header("Panel Buttons")]
-    [SerializeField] private Button nextLevelButton;
-    [SerializeField] private Button retryButton;
-
-    private void Start()
+    public sealed class UIManager : MonoBehaviour
     {
-        if (BoardManager.Instance == null) return;
+        [Header("Screens")]
+        [SerializeField] private GameObject mainMenuPanel;
+        [SerializeField] private GameObject gameplayPanel;
+        [SerializeField] private GameObject levelSelectPanel;
+        [SerializeField] private GameObject themesPanel;
+        [SerializeField] private GameObject dailyPanel;
+        [SerializeField] private GameObject pausePanel;
+        [SerializeField] private GameObject winPanel;
+        [SerializeField] private GameObject losePanel;
 
-        BoardManager.Instance.OnHeartsChanged += UpdateHearts;
-        BoardManager.Instance.OnLevelChanged += UpdateLevel;
-        BoardManager.Instance.OnLevelComplete += ShowWin;
-        BoardManager.Instance.OnGameOver += ShowLose;
+        [Header("Gameplay")]
+        [SerializeField] private MainMenuUI mainMenuUI;
+        [SerializeField] private GameplayUI gameplayUI;
+        [SerializeField] private LevelSelectUI levelSelectUI;
+        [SerializeField] private ThemeUI themeUI;
+        [SerializeField] private DailyRewardUI dailyRewardUI;
+        [SerializeField] private TMP_Text winLevelText;
+        [SerializeField] private TMP_Text winStarsText;
+        [SerializeField] private TMP_Text loseLevelText;
 
-        if (hintButton != null)
-            hintButton.onClick.AddListener(() => BoardManager.Instance.ShowHint());
+        [Header("Services")]
+        [SerializeField] private AdService adService;
 
-        if (nextLevelButton != null)
-            nextLevelButton.onClick.AddListener(() =>
+        private GameManager gameManager;
+
+        public void Initialize(GameManager manager)
+        {
+            gameManager = manager;
+            HideAll();
+        }
+
+        public void ShowMainMenu()
+        {
+            HideAll();
+            mainMenuPanel.SetActive(true);
+            if (mainMenuUI != null) mainMenuUI.Bind(gameManager);
+        }
+
+        public void ShowGameplay(LevelData level)
+        {
+            HideAll();
+            gameplayPanel.SetActive(true);
+            gameplayUI.Bind(gameManager, level);
+        }
+
+        public void ShowLevelSelect()
+        {
+            HideAll();
+            levelSelectPanel.SetActive(true);
+            levelSelectUI.Build(gameManager);
+        }
+
+        public void ShowThemes()
+        {
+            HideAll();
+            themesPanel.SetActive(true);
+            themeUI.Build(gameManager);
+        }
+
+        public void ShowDailyReward()
+        {
+            HideAll();
+            dailyPanel.SetActive(true);
+            dailyRewardUI.Refresh(gameManager);
+        }
+
+        public void ShowPause() => pausePanel.SetActive(true);
+        public void ShowWin(int level, int stars)
+        {
+            winLevelText.text = $"LEVEL {level}";
+            winStarsText.text = new string('★', stars) + new string('☆', 3 - stars);
+            winPanel.SetActive(true);
+        }
+        public void ShowLose(int level)
+        {
+            loseLevelText.text = $"LEVEL {level}";
+            losePanel.SetActive(true);
+        }
+        public void HidePopup()
+        {
+            pausePanel.SetActive(false);
+            winPanel.SetActive(false);
+            losePanel.SetActive(false);
+        }
+
+        public void OnHint()
+        {
+            if (!gameManager.GetComponent<HintSystem>().RequestHint())
             {
-                HidePanels();
-                BoardManager.Instance.NextLevel();
-            });
+                adService.ShowRewarded(() => gameManager.GetComponent<HintSystem>().RewardedHintsGranted());
+            }
+        }
 
-        if (retryButton != null)
-            retryButton.onClick.AddListener(() =>
-            {
-                HidePanels();
-                BoardManager.Instance.RestartLevel();
-            });
+        public void OnWrongTapFeedback()
+        {
+            gameManager.GetComponent<AudioManager>().PlayWrong();
+            Haptics.Wrong();
+        }
 
-        if (backButton != null)
-            backButton.onClick.AddListener(() => SceneManager.LoadScene("MainMenu"));
-
-        HidePanels();
-        UpdateHearts(BoardManager.Instance.Hearts);
-        UpdateLevel(BoardManager.Instance.CurrentLevel);
+        private void HideAll()
+        {
+            mainMenuPanel.SetActive(false);
+            gameplayPanel.SetActive(false);
+            levelSelectPanel.SetActive(false);
+            themesPanel.SetActive(false);
+            dailyPanel.SetActive(false);
+            pausePanel.SetActive(false);
+            winPanel.SetActive(false);
+            losePanel.SetActive(false);
+        }
     }
-
-    private void UpdateHearts(int hearts)
-    {
-        if (heartsText != null)
-            heartsText.text = "Hearts: " + hearts + "/3";
-    }
-
-    private void UpdateLevel(int level)
-    {
-        if (levelText != null)
-            levelText.text = "Level " + level;
-    }
-
-    private void ShowWin()
-    {
-        if (winPanel != null) winPanel.SetActive(true);
-    }
-
-    private void ShowLose()
-    {
-        if (losePanel != null) losePanel.SetActive(true);
-    }
-
-    private void HidePanels()
-    {
-        if (winPanel != null) winPanel.SetActive(false);
-        if (losePanel != null) losePanel.SetActive(false);
-    }
-}

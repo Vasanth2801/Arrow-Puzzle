@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c2e8e0a8e6a4f0b9a8c0d1e2f3a4b5c, type: 3}
+  m_Name: GameConfig
+  m_EditorClassIdentifier:
+  baseSeed: 913742
+  minGridSize: 9
+  maxGridSize: 14
+  minPathLength: 2
+  maxPathLength: 7
+  maxGenerationAttempts: 80
+  maxPathPlacementAttempts: 2500
+  boardWidthSafeArea: 0.92
+  boardHeightSafeArea: 0.6
+  lineWidthAsCell: 0.055
+  arrowLengthAsCell: 0.23
+  arrowWidthAsCell: 0.14
+  extractDuration: 0.42
+  wrongShakeDuration: 0.18
+  wrongShakeDistanceAsCell: 0.08
+  hintDuration: 1.8
+  startingLives: 3
+  freeHintsPerDay: 3
+  rewardedHintAmount: 3
